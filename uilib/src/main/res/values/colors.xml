@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#00a2ca</color>
+    <color name="colorPrimaryDark">#00a2ca</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="white">#ffffff</color>
+    <color name="text_dark">#4d4d4d</color>
+    <color name="text_black">#333333</color>
+    <color name="text_hint">#999999</color>
+    <color name="text_gray">#666666</color>
+    <color name="blue">#3FCFEF</color>
+    <color name="aqua">#00FFFF</color>
+    <color name="divide_line">#1aadeb</color>
+    <color name="list_item_bg">#cecbcb</color>
+    <color name="color_yellow_normal">#F8A202</color>
+    <color name="color_yellow_press">#e1b324</color>
+    <color name="color_green_normal">#44a734</color>
+    <color name="color_green_press">#419038</color>
+    <color name="list_item_normal">#e0e5e0</color>
+    <color name="text_red">#d23a39</color>
+    <color name="text_red_pressed">#e52625</color>
+    <color name="gray_text">#e1e0dd</color>
+    <color name="title_bg">#00a2ca</color>
+    <color name="edit_hint">#c2c2c2</color>
+    <color name="search_gray_bg">#e6e6e6</color>
+    <color name="color_blue_normal">#00a2ca</color>
+    <color name="color_blue_press">#00a2ff</color>
+    <color name="bg_main">#fbfbfb</color>
+    <color name="theme_body">#cc22292c</color>
+    <color name="theme_body_dark">#cc20272a</color>
+</resources>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <include layout="@layout/search_layout" />
+
+    <com.sherchen.slidetoggleheader.views.ObservableXListView
+        android:id="@android:id/list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/search_layout"
+        android:divider="@android:color/transparent" />
+
+    <ImageView
+        android:id="@+id/load"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true" />
+
+    <com.trueway.app.uilib.widget.LetterBar
+        android:id="@+id/letter_bar"
+        android:layout_width="20dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/search_layout"
+        android:paddingBottom="20dp"
+        android:paddingTop="10dp"
+        app:textColor="@color/title_bg"
+        app:textSize="16sp" />
+
+</RelativeLayout>
