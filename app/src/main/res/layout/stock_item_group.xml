@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.tubb.smrv.SwipeHorizontalMenuLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:sml="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/sml"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    sml:sml_auto_open_percent="0.2"
+    sml:sml_scroller_duration="250"
+    sml:sml_scroller_interpolator="@android:anim/bounce_interpolator">
+
+    <include
+        android:id="@id/smContentView"
+        layout="@layout/four_item" />
+
+    <TextView
+        android:id="@id/smMenuViewRight"
+        android:layout_width="70dp"
+        android:layout_height="match_parent"
+        android:background="@drawable/btn_pink"
+        android:drawablePadding="5dp"
+        android:drawableTop="@mipmap/icon_remove"
+        android:gravity="center"
+        android:paddingBottom="12dp"
+        android:paddingTop="12dp"
+        android:text="移除"
+        android:textColor="@color/white"
+        android:textSize="10sp" />
+
+    <TextView
+        android:id="@id/smMenuViewLeft"
+        android:layout_width="70dp"
+        android:layout_height="match_parent"
+        android:background="@drawable/btn_pink"
+        android:drawablePadding="5dp"
+        android:drawableTop="@mipmap/icon_edit"
+        android:gravity="center"
+        android:paddingBottom="12dp"
+        android:paddingTop="12dp"
+        android:text="数量"
+        android:textColor="@color/white"
+        android:textSize="10sp" />
+</com.tubb.smrv.SwipeHorizontalMenuLayout>

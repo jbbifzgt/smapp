@@ -1,44 +1,24 @@
 package cn.bingoogolapple.qrcode.core;
 
+import android.content.Context;
+import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.RectF;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.text.Layout;
+import android.text.StaticLayout;
+import android.text.TextPaint;
+import android.text.TextUtils;
+import android.util.AttributeSet;
+import android.view.View;
+
 import com.platform.cdcs.R;
-
-import android.content.Context;
-import android.content.res.TypedArray;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.RectF;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.text.Layout;
-import android.text.StaticLayout;
-import android.text.TextPaint;
-import android.text.TextUtils;
-import android.util.AttributeSet;
-import android.view.View;
-
-import android.content.Context;
-import android.content.res.TypedArray;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.RectF;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.text.Layout;
-import android.text.StaticLayout;
-import android.text.TextPaint;
-import android.text.TextUtils;
-import android.util.AttributeSet;
-import android.view.View;
-
-import java.lang.reflect.Field;
 
 public class ScanBoxView extends View {
     private int mMoveStepDistance;
@@ -224,7 +204,7 @@ public class ScanBoxView extends View {
             mOriginQRCodeGridScanLineBitmap = ((BitmapDrawable) mCustomGridScanLineDrawable).getBitmap();
         }
         if (mOriginQRCodeGridScanLineBitmap == null) {
-//            mOriginQRCodeGridScanLineBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.qrcode_default_grid_scan_line);
+            mOriginQRCodeGridScanLineBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.qrcode_default_grid_scan_line);
             mOriginQRCodeGridScanLineBitmap = BGAQRCodeUtil.makeTintBitmap(mOriginQRCodeGridScanLineBitmap, mScanLineColor);
         }
         mOriginBarCodeGridScanLineBitmap = BGAQRCodeUtil.adjustPhotoRotation(mOriginQRCodeGridScanLineBitmap, 90);
@@ -236,12 +216,11 @@ public class ScanBoxView extends View {
             mOriginQRCodeScanLineBitmap = ((BitmapDrawable) mCustomScanLineDrawable).getBitmap();
         }
         if (mOriginQRCodeScanLineBitmap == null) {
-//            mOriginQRCodeScanLineBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.qrcode_default_scan_line);
+            mOriginQRCodeScanLineBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.qrcode_default_scan_line);
             mOriginQRCodeScanLineBitmap = BGAQRCodeUtil.makeTintBitmap(mOriginQRCodeScanLineBitmap, mScanLineColor);
         }
         mOriginBarCodeScanLineBitmap = BGAQRCodeUtil.adjustPhotoRotation(mOriginQRCodeScanLineBitmap, 90);
 
-        mToolbarHeight += getStatusBarHeight();
         mTopOffset += mToolbarHeight;
         mHalfCornerSize = 1.0f * mCornerSize / 2;
 
@@ -251,40 +230,34 @@ public class ScanBoxView extends View {
         setIsBarcode(mIsBarcode);
     }
 
-    private int getStatusBarHeight() {
-        try {
-            Class<?> c = Class.forName("com.android.internal.R$dimen");
-            Object obj = c.newInstance();
-            Field field = c.getField("status_bar_height");
-            int x = Integer.parseInt(field.get(obj).toString());
-            return getResources().getDimensionPixelSize(x);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
     @Override
     public void onDraw(Canvas canvas) {
         if (mFramingRect == null) {
             return;
         }
 
+        // 画遮罩层
         drawMask(canvas);
 
+        // 画边框线
         drawBorderLine(canvas);
 
+        // 画四个直角的线
         drawCornerLine(canvas);
 
+        // 画扫描线
         drawScanLine(canvas);
 
+        // 画提示文本
         drawTipText(canvas);
 
-//        moveScanLine();
+        // 移动扫描线的位置
+        moveScanLine();
 
     }
 
     /**
+     * 画遮罩层
      *
      * @param canvas
      */
@@ -303,6 +276,8 @@ public class ScanBoxView extends View {
     }
 
     /**
+     * 画边框线
+     *
      * @param canvas
      */
     private void drawBorderLine(Canvas canvas) {
@@ -315,7 +290,7 @@ public class ScanBoxView extends View {
     }
 
     /**
-//     * ���ĸ�ֱ�ǵ���
+     * 画四个直角的线
      *
      * @param canvas
      */
@@ -337,6 +312,8 @@ public class ScanBoxView extends View {
     }
 
     /**
+     * 画扫描线
+     *
      * @param canvas
      */
     private void drawScanLine(Canvas canvas) {
@@ -384,6 +361,8 @@ public class ScanBoxView extends View {
     }
 
     /**
+     * 画提示文本
+     *
      * @param canvas
      */
     private void drawTipText(Canvas canvas) {
@@ -440,10 +419,12 @@ public class ScanBoxView extends View {
     }
 
     /**
+     * 移动扫描线的位置
      */
     private void moveScanLine() {
         if (mIsBarcode) {
             if (mGridScanLineBitmap == null) {
+                // 处理非网格扫描图片的情况
                 mScanLineLeft += mMoveStepDistance;
                 int scanLineSize = mScanLineSize;
                 if (mScanLineBitmap != null) {
@@ -460,6 +441,7 @@ public class ScanBoxView extends View {
                     }
                 }
             } else {
+                // 处理网格扫描图片的情况
                 mGridScanLineRight += mMoveStepDistance;
                 if (mGridScanLineRight > mFramingRect.right - mHalfCornerSize) {
                     mGridScanLineRight = mFramingRect.left + mHalfCornerSize + 0.5f;
@@ -467,6 +449,7 @@ public class ScanBoxView extends View {
             }
         } else {
             if (mGridScanLineBitmap == null) {
+                // 处理非网格扫描图片的情况
                 mScanLineTop += mMoveStepDistance;
                 int scanLineSize = mScanLineSize;
                 if (mScanLineBitmap != null) {
@@ -483,6 +466,7 @@ public class ScanBoxView extends View {
                     }
                 }
             } else {
+                // 处理网格扫描图片的情况
                 mGridScanLineBottom += mMoveStepDistance;
                 if (mGridScanLineBottom > mFramingRect.bottom - mHalfCornerSize) {
                     mGridScanLineBottom = mFramingRect.top + mHalfCornerSize + 0.5f;

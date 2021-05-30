@@ -29,10 +29,13 @@ public class ImageItem implements Serializable {
     public String name;
     public long time;
 
-    public ImageItem(String path, String name, long time){
+    public ImageItem(String path, String name, long time) {
         this.path = path;
         this.name = name;
         this.time = time;
+    }
+
+    public ImageItem() {
     }
 
     @Override
@@ -40,7 +43,7 @@ public class ImageItem implements Serializable {
         try {
             ImageItem other = (ImageItem) o;
             return this.path.equalsIgnoreCase(other.path) && this.time == other.time;
-        }catch (ClassCastException e){
+        } catch (ClassCastException e) {
             e.printStackTrace();
         }
         return super.equals(o);

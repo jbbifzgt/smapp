@@ -176,14 +176,23 @@ public class Utils {
     }
 
     public static void showToast(Context context, String s) {
+        if (context == null) {
+            return;
+        }
         Toast.makeText(context, s, Toast.LENGTH_SHORT).show();
     }
 
     public static void showToast(String s, Context context) {
+        if (context == null) {
+            return;
+        }
         Toast.makeText(context, s, Toast.LENGTH_SHORT).show();
     }
 
     public static void showToast(Context context, int s) {
+        if (context == null) {
+            return;
+        }
         Toast.makeText(context, s, Toast.LENGTH_SHORT).show();
     }
 
@@ -239,7 +248,7 @@ public class Utils {
             if (bgBitmap != null) {
                 bgBitmap.recycle();
             }
-            if(bitmap!=null){
+            if (bitmap != null) {
                 bitmap.recycle();
             }
         }
@@ -260,6 +269,7 @@ public class Utils {
 
     /**
      * Convert a dp float value to pixels
+     *
      * @param context
      * @param dp
      * @return the responsive pixels
@@ -269,9 +279,9 @@ public class Utils {
         return Math.round(px);
     }
 
-    public static boolean isStorageEnable(){
+    public static boolean isStorageEnable() {
         String sdStatus = Environment.getExternalStorageState();
-        if(!sdStatus.equals(Environment.MEDIA_MOUNTED)) {
+        if (!sdStatus.equals(Environment.MEDIA_MOUNTED)) {
             Log.d("TestFile", "SD card is not available/writable right now.");
             return false;
         }

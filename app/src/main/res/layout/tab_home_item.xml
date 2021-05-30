@@ -15,8 +15,7 @@
         <ImageView
             android:id="@+id/img"
             android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@mipmap/home_type_1" />
+            android:layout_height="40dp" />
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -27,7 +26,6 @@
                 android:id="@+id/title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="发票上报"
                 android:textColor="@color/gray_text"
                 android:textSize="15sp" />
 
@@ -36,7 +34,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/title"
-                android:text="07-25 14:38"
                 android:textColor="@color/gray_text"
                 android:textSize="14sp" />
 
@@ -46,7 +43,6 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/time"
                 android:layout_marginTop="20dp"
-                android:text="发票上传成功"
                 android:textColor="@color/text_black"
                 android:textSize="16sp" />
 
@@ -63,7 +59,6 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:singleLine="true"
-                    android:text="文件编号：25571"
                     android:textColor="@color/text_dark"
                     android:textSize="14sp" />
 
@@ -73,7 +68,6 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:singleLine="true"
-                    android:text="上报人：陈小丽"
                     android:textColor="@color/text_dark"
                     android:textSize="14sp" />
 
@@ -81,7 +75,6 @@
                     android:id="@+id/button3"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="立即查看"
                     android:textColor="@color/blue"
                     android:textSize="14sp" />
             </LinearLayout>

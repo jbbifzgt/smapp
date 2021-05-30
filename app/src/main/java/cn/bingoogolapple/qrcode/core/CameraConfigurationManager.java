@@ -16,10 +16,17 @@ final class CameraConfigurationManager {
     private static final Pattern COMMA_PATTERN = Pattern.compile(",");
     private final Context mContext;
     private Point mScreenResolution;
-    private Point cameraResolution;
+    private Point mCameraResolution;
+    private Point mPreviewResolution;
 
     public CameraConfigurationManager(Context context) {
         mContext = context;
+    }
+
+    public static boolean autoFocusAble(Camera camera) {
+        List<String> supportedFocusModes = camera.getParameters().getSupportedFocusModes();
+        String focusMode = findSettableValue(supportedFocusModes, Camera.Parameters.FOCUS_MODE_AUTO);
+        return focusMode != null;
     }
 
     private static String findSettableValue(Collection<String> supportedValues, String... desiredValues) {
@@ -35,13 +42,13 @@ final class CameraConfigurationManager {
         return result;
     }
 
-    private static Point getCameraResolution(Camera.Parameters parameters, Point screenResolution) {
-        Point cameraResolution =
-            findBestPreviewSizeValue(parameters.getSupportedPreviewSizes(), screenResolution);
-        if (cameraResolution == null) {
-            cameraResolution = new Point((screenResolution.x >> 3) << 3, (screenResolution.y >> 3) << 3);
+    private static Point getPreviewResolution(Camera.Parameters parameters, Point screenResolution) {
+        Point previewResolution =
+                findBestPreviewSizeValue(parameters.getSupportedPreviewSizes(), screenResolution);
+        if (previewResolution == null) {
+            previewResolution = new Point((screenResolution.x >> 3) << 3, (screenResolution.y >> 3) << 3);
         }
-        return cameraResolution;
+        return previewResolution;
     }
 
     private static Point findBestPreviewSizeValue(List<Camera.Size> supportSizeList, Point screenResolution) {
@@ -93,29 +100,40 @@ final class CameraConfigurationManager {
 
     public void initFromCameraParameters(Camera camera) {
         Camera.Parameters parameters = camera.getParameters();
-        WindowManager manager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-        Display display = manager.getDefaultDisplay();
-        mScreenResolution = new Point(display.getWidth(), display.getHeight());
+
+        if (CameraConfigurationManager.autoFocusAble(camera)) {
+            parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+        }
+
+        mScreenResolution = BGAQRCodeUtil.getScreenResolution(mContext);
         Point screenResolutionForCamera = new Point();
         screenResolutionForCamera.x = mScreenResolution.x;
         screenResolutionForCamera.y = mScreenResolution.y;
 
         // preview size is always something like 480*320, other 320*480
-        if (mScreenResolution.x < mScreenResolution.y) {
+        int orientation = BGAQRCodeUtil.getOrientation(mContext);
+
+        if (orientation == BGAQRCodeUtil.ORIENTATION_PORTRAIT) {
             screenResolutionForCamera.x = mScreenResolution.y;
             screenResolutionForCamera.y = mScreenResolution.x;
         }
 
-        cameraResolution = getCameraResolution(parameters, screenResolutionForCamera);
+        mPreviewResolution = getPreviewResolution(parameters, screenResolutionForCamera);
+
+        if (orientation == BGAQRCodeUtil.ORIENTATION_PORTRAIT) {
+            mCameraResolution = new Point(mPreviewResolution.y, mPreviewResolution.x);
+        } else {
+            mCameraResolution = mPreviewResolution;
+        }
     }
 
     public Point getCameraResolution() {
-        return  cameraResolution;
+        return mCameraResolution;
     }
 
     public void setDesiredCameraParameters(Camera camera) {
         Camera.Parameters parameters = camera.getParameters();
-        parameters.setPreviewSize(cameraResolution.x, cameraResolution.y);
+        parameters.setPreviewSize(mPreviewResolution.x, mPreviewResolution.y);
         setZoom(parameters);
 
         camera.setDisplayOrientation(getDisplayOrientation());

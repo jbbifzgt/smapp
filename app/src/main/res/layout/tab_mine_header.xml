@@ -12,7 +12,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:gravity="center"
-        android:text="江苏维达医疗器械有限公司"
         android:textColor="@color/white"
         android:textSize="16sp" />
 
@@ -22,7 +21,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         android:gravity="center"
-        android:text="经销商管理员/数据管理"
         android:textColor="@color/white"
         android:textSize="14sp" />
 
@@ -41,7 +39,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         android:gravity="center"
-        android:text="2015-09-01 注册"
         android:textColor="@color/gray_text"
         android:textSize="14sp" />
 </LinearLayout>

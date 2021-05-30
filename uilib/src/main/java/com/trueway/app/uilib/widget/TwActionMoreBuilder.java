@@ -135,7 +135,6 @@ public class TwActionMoreBuilder {
 //            } catch (Exception e) {
 //                textView.setTextColor(Color.BLACK);
 //            }
-
             textView.setTextSize(14);
             textView.setTextColor(context.getResources().getColor(R.color.text_dark));
             textView.setGravity(Gravity.CENTER);

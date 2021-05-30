@@ -1,7 +1,5 @@
 package cn.bingoogolapple.qrcode.core;
 
-import com.platform.cdcs.R;
-
 import android.content.Context;
 import android.hardware.Camera;
 import android.os.Handler;
@@ -9,6 +7,8 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.RelativeLayout;
+
+import com.platform.cdcs.R;
 
 public abstract class QRCodeView extends RelativeLayout implements Camera.PreviewCallback, ProcessDataTask.Delegate {
     protected Camera mCamera;
@@ -18,6 +18,7 @@ public abstract class QRCodeView extends RelativeLayout implements Camera.Previe
     protected Handler mHandler;
     protected boolean mSpotAble = false;
     protected ProcessDataTask mProcessDataTask;
+    private int mOrientation;
     private Runnable mOneShotPreviewCallbackTask = new Runnable() {
         @Override
         public void run() {
@@ -48,10 +49,12 @@ public abstract class QRCodeView extends RelativeLayout implements Camera.Previe
         mScanBoxView.initCustomAttrs(context, attrs);
         mPreview.setId(R.id.bgaqrcode_camera_preview);
         addView(mPreview);
-        LayoutParams layoutParams = new LayoutParams(context, attrs);
+        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(context, attrs);
         layoutParams.addRule(RelativeLayout.ALIGN_TOP, mPreview.getId());
         layoutParams.addRule(RelativeLayout.ALIGN_BOTTOM, mPreview.getId());
         addView(mScanBoxView, layoutParams);
+
+        mOrientation = BGAQRCodeUtil.getOrientation(context);
     }
 
     /**
@@ -259,7 +262,7 @@ public abstract class QRCodeView extends RelativeLayout implements Camera.Previe
     public void onPreviewFrame(final byte[] data, final Camera camera) {
         if (mSpotAble) {
             cancelProcessDataTask();
-            mProcessDataTask = new ProcessDataTask(camera, data, this) {
+            mProcessDataTask = new ProcessDataTask(camera, data, this, mOrientation) {
                 @Override
                 protected void onPostExecute(String result) {
                     if (mSpotAble) {

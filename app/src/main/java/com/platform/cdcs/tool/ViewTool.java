@@ -1,5 +1,6 @@
 package com.platform.cdcs.tool;
 
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,12 +23,16 @@ public class ViewTool {
             parent.addView(rootView);
         }
         if (mustFlag) {
-            ((TextView) rootView.findViewById(R.id.title)).setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+            ((TextView) rootView.findViewById(R.id.title1)).setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.input_star, 0);
         }
-        ((TextView) rootView.findViewById(R.id.title)).setText(title);
-        EditText et = (EditText) rootView.findViewById(R.id.text);
+        ((TextView) rootView.findViewById(R.id.title1)).setText(title);
+        EditText et = (EditText) rootView.findViewById(R.id.text1);
         if (!arrow) {
             et.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+        } else {
+            et.setInputType(InputType.TYPE_NULL);
+            et.setClickable(true);
+            et.setFocusableInTouchMode(false);
         }
         return et;
     }
@@ -38,12 +43,16 @@ public class ViewTool {
             parent.addView(rootView);
         }
         if (mustFlag) {
-            ((TextView) rootView.findViewById(R.id.title)).setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+            ((TextView) rootView.findViewById(R.id.title1)).setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.input_star, 0);
         }
-        ((TextView) rootView.findViewById(R.id.title)).setText(title);
-        EditText et = (EditText) rootView.findViewById(R.id.text);
+        ((TextView) rootView.findViewById(R.id.title1)).setText(title);
+        EditText et = (EditText) rootView.findViewById(R.id.text1);
         if (!arrow) {
             et.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+        } else {
+            et.setInputType(InputType.TYPE_NULL);
+            et.setClickable(true);
+            et.setFocusableInTouchMode(false);
         }
         return et;
     }
@@ -75,25 +84,43 @@ public class ViewTool {
         return imgView;
     }
 
-    public static void setFourItem(LayoutInflater inflater, ViewGroup parent, String[] labels, String[] values) {
+    public static TextView[] setFourItem(LayoutInflater inflater, ViewGroup parent, String[] labels, String[] values, boolean star) {
+//        View rootView = inflater.inflate(R.layout.item_four_text, null);
+//        if (parent != null) {
+//            parent.addView(rootView);
+//        }
+//        ((TextView) rootView.findViewById(R.id.title)).setText(labels[0]);
+//        ((TextView) rootView.findViewById(R.id.text)).setText(values[0]);
+//        ((TextView) rootView.findViewById(R.id.title1)).setText(labels[1]);
+//        ((TextView) rootView.findViewById(R.id.text1)).setText(values[1]);
+        View rootView = setFourItem(inflater, parent, labels, values);
+        ((TextView) rootView.findViewById(R.id.title1)).setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.input_star, 0);
+        ((TextView) rootView.findViewById(R.id.title2)).setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.input_star, 0);
+        TextView[] tvs=new TextView[]{(TextView) rootView.findViewById(R.id.text1),(TextView) rootView.findViewById(R.id.text2)};
+        return tvs;
+    }
+
+    public static View setFourItem(LayoutInflater inflater, ViewGroup parent, String[] labels, String[] values) {
         View rootView = inflater.inflate(R.layout.item_four_text, null);
         if (parent != null) {
             parent.addView(rootView);
         }
-        ((TextView) rootView.findViewById(R.id.title)).setText(labels[0]);
-        ((TextView) rootView.findViewById(R.id.text)).setText(values[0]);
-        ((TextView) rootView.findViewById(R.id.title1)).setText(labels[1]);
-        ((TextView) rootView.findViewById(R.id.text1)).setText(values[1]);
+        ((TextView) rootView.findViewById(R.id.title1)).setText(labels[0]);
+        ((TextView) rootView.findViewById(R.id.text1)).setText(values[0]);
+        ((TextView) rootView.findViewById(R.id.title2)).setText(labels[1]);
+        ((TextView) rootView.findViewById(R.id.text2)).setText(values[1]);
+        return rootView;
     }
+
 
     public static TextView[] setFourItem(LayoutInflater inflater, ViewGroup parent, String[] labels) {
         View rootView = inflater.inflate(R.layout.item_four_text, null);
         if (parent != null) {
             parent.addView(rootView);
         }
-        ((TextView) rootView.findViewById(R.id.title)).setText(labels[0]);
-        ((TextView) rootView.findViewById(R.id.title1)).setText(labels[1]);
-        return new TextView[]{(TextView) rootView.findViewById(R.id.text), (TextView) rootView.findViewById(R.id.text1)};
+        ((TextView) rootView.findViewById(R.id.title1)).setText(labels[0]);
+        ((TextView) rootView.findViewById(R.id.text1)).setText(labels[1]);
+        return new TextView[]{(TextView) rootView.findViewById(R.id.title1), (TextView) rootView.findViewById(R.id.text1)};
     }
 
     public static TextView createTitleItem(LayoutInflater inflater, LinearLayout parent) {
@@ -101,7 +128,36 @@ public class ViewTool {
         if (parent != null) {
             parent.addView(rootView);
         }
-        rootView.findViewById(R.id.text).setVisibility(View.GONE);
-        return ((TextView) rootView.findViewById(R.id.title));
+        rootView.findViewById(R.id.text1).setVisibility(View.GONE);
+        return ((TextView) rootView.findViewById(R.id.title1));
+    }
+
+    public static View setUpDownItem(LayoutInflater inflater, LinearLayout parent, String title, String text) {
+        View rootView = inflater.inflate(R.layout.up_down, null);
+        if (parent != null) {
+            parent.addView(rootView);
+        }
+        TextView titleView = (TextView) rootView.findViewById(R.id.title1);
+        titleView.setTextSize(12);
+        titleView.setTextColor(inflater.getContext().getResources().getColor(R.color.text_hint));
+        titleView.setText(title);
+        TextView textView = (TextView) rootView.findViewById(R.id.text1);
+        textView.setTextSize(14);
+        textView.setTextColor(inflater.getContext().getResources().getColor(R.color.text_dark));
+        textView.setText(text);
+        return rootView;
+    }
+
+    public static void setSixItem(LayoutInflater inflater, LinearLayout parent, String[] titles, String[] texts) {
+        View rootView = inflater.inflate(R.layout.item_six_text, null);
+        if (parent != null) {
+            parent.addView(rootView);
+        }
+        ((TextView) rootView.findViewById(R.id.title1)).setText(titles[0]);
+        ((TextView) rootView.findViewById(R.id.text1)).setText(texts[0]);
+        ((TextView) rootView.findViewById(R.id.title2)).setText(titles[1]);
+        ((TextView) rootView.findViewById(R.id.text2)).setText(texts[1]);
+        ((TextView) rootView.findViewById(R.id.title3)).setText(titles[2]);
+        ((TextView) rootView.findViewById(R.id.text3)).setText(texts[2]);
     }
 }

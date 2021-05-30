@@ -13,13 +13,13 @@
         android:layout_height="match_parent"
         android:layout_below="@+id/activity_main_toolbar"
         app:qrcv_animTime="1000"
-        app:qrcv_barcodeRectHeight="200dp"
+        app:qrcv_barcodeRectHeight="260dp"
         app:qrcv_borderColor="@android:color/white"
         app:qrcv_borderSize="1dp"
         app:qrcv_cornerColor="@color/white"
         app:qrcv_cornerLength="20dp"
         app:qrcv_cornerSize="3dp"
-        app:qrcv_isBarcode="false"
+        app:qrcv_isBarcode="true"
         app:qrcv_isCenterVertical="false"
         app:qrcv_isOnlyDecodeScanBoxArea="true"
         app:qrcv_isShowDefaultGridScanLineDrawable="true"
@@ -27,11 +27,21 @@
         app:qrcv_isShowTipBackground="true"
         app:qrcv_isShowTipTextAsSingleLine="false"
         app:qrcv_isTipTextBelowRect="false"
-        app:qrcv_maskColor="#33FFFFFF"
-        app:qrcv_rectWidth="180dp"
+        app:qrcv_maskColor="#a0000000"
+        app:qrcv_rectWidth="300dp"
         app:qrcv_scanLineColor="#00000000"
         app:qrcv_toolbarHeight="@dimen/title_height"
-        app:qrcv_topOffset="50dp" />
+        app:qrcv_topOffset="@dimen/title_height" />
+
+    <TextView
+        android:id="@+id/text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/activity_main_toolbar"
+        android:layout_marginTop="40dp"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:textSize="14sp" />
 
     <LinearLayout
         android:id="@+id/root"

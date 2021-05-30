@@ -1,5 +1,6 @@
 package com.platform.cdcs.fragment.custom;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.LayoutInflater;
@@ -8,15 +9,36 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.platform.cdcs.R;
+import com.platform.cdcs.fragment.choose.AccountChooseFragment;
+import com.platform.cdcs.model.BaseObjResponse;
+import com.platform.cdcs.model.MockObj;
+import com.platform.cdcs.model.SubBUItem;
+import com.platform.cdcs.tool.Constant;
 import com.platform.cdcs.tool.FragmentUtil;
 import com.platform.cdcs.tool.ViewTool;
 import com.trueway.app.uilib.fragment.BaseFragment;
+import com.trueway.app.uilib.model.ChooseItem;
+import com.trueway.app.uilib.tool.Utils;
+import com.trueway.app.uilib.widget.TwDialogBuilder;
+import com.zhy.http.okhttp.callback.StringCallback;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import okhttp3.Call;
 
 /**
  * Created by holytang on 2017/9/28.
  */
 public class AddRegNumberFragment extends BaseFragment {
+
+    private EditText lineET, lineNameET;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -36,18 +58,13 @@ public class AddRegNumberFragment extends BaseFragment {
         LayoutInflater inflater = LayoutInflater.from(getContext());
         LinearLayout root1 = (LinearLayout) view.findViewById(R.id.button1);
         EditText nameET = ViewTool.createEditItem(inflater, "标准名称", root1, true, true);
-        nameET.setOnTouchListener(new View.OnTouchListener() {
+        nameET.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                if(motionEvent.getAction()==MotionEvent.ACTION_UP){
-                    FragmentUtil.navigateToInNewActivity(getActivity(), ProSearchListFragment.class, null);
-                    return true;
-                }
-                return false;
+            public void onClick(View view) {
+                FragmentUtil.navigateToInNewActivity(getActivity(), ProSearchListFragment.class, null);
             }
         });
         nameET.setHint("请选择产品");
-        nameET.setInputType(InputType.TYPE_NULL);
 
         EditText codeET = ViewTool.createEditItem(inflater, "标准代码", root1, true, false);
 
@@ -62,7 +79,7 @@ public class AddRegNumberFragment extends BaseFragment {
         unitET.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                requestUnit();
             }
         });
         unitET.setHint("请选择单位");
@@ -72,7 +89,7 @@ public class AddRegNumberFragment extends BaseFragment {
         clientNameET.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                FragmentUtil.navigateToInNewActivity(getActivity(), AccountChooseFragment.class, null);
             }
         });
         clientNameET.setHint("请选择客户名称");
@@ -80,8 +97,14 @@ public class AddRegNumberFragment extends BaseFragment {
         EditText clientCodeET = ViewTool.createEditItemNoLine(inflater, "客户代码", root2, false, false);
 
         LinearLayout root3 = (LinearLayout) view.findViewById(R.id.button3);
-        EditText lineET = ViewTool.createEditItem(inflater, "产品线", root2, false, false);
-        EditText lineNameET = ViewTool.createEditItemNoLine(inflater, "产品线名称", root3, false, false);
+        lineET = ViewTool.createEditItem(inflater, "产品线", root2, false, true);
+        lineET.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                requestSubBU();
+            }
+        });
+        lineNameET = ViewTool.createEditItemNoLine(inflater, "产品线名称", root3, false, false);
 
         LinearLayout root4 = (LinearLayout) view.findViewById(R.id.button4);
         EditText addressET = ViewTool.createEditItem(inflater, "产地", root4, false, false);
@@ -111,12 +134,106 @@ public class AddRegNumberFragment extends BaseFragment {
         });
     }
 
+    private void requestSubBU() {
+        getHttpClient().post().url(Constant.SUBBU_LST).params(Constant.makeParam(new HashMap<String, String>())).build().execute(new StringCallback() {
+            @Override
+            public void onError(Call call, Exception e, int i) {
+                Utils.showToast(getActivity(), R.string.server_error);
+            }
+
+            @Override
+            public void onResponse(String s, int i) {
+                try {
+                    Type type = new TypeToken<BaseObjResponse<SubBUItem.SubBUList>>() {
+                    }.getType();
+                    BaseObjResponse<SubBUItem.SubBUList> response = new Gson().fromJson(s, type);
+                    if ("1".equals(response.getResult().getCode())) {
+                        final List<ChooseItem> subBuList = new ArrayList<ChooseItem>();
+                        ChooseItem item = new ChooseItem();
+                        item.setTitle("全部产品线");
+                        item.setTime("");
+                        item.setIsCheck(true);
+                        subBuList.add(item);
+                        for (SubBUItem sub : response.getResult().getObjList()) {
+                            item = new ChooseItem();
+                            item.setTitle(sub.getLocalSubBUCode());
+                            item.setTime(sub.getSubBU());
+                            subBuList.add(item);
+                        }
+                        String[] array = new String[subBuList.size()];
+                        for (int j = 0; j < subBuList.size(); j++) {
+                            array[j] = subBuList.get(j).getTitle();
+                        }
+                        new TwDialogBuilder(getContext()).setItems(array, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                //TODO
+                                lineET.setText(subBuList.get(i).getTitle());
+                                lineNameET.setText(subBuList.get(i).getText());
+                            }
+                        }, "").create().show();
+                    }
+                } catch (Exception e) {
+
+                }
+            }
+        });
+    }
+
     @Override
     public int layoutId() {
-        return R.layout.product_reg;
+        return R.layout.five_layout;
     }
 
     private void postClick() {
+        //TODO
+        showLoadImg();
+        
+        Map<String,String> param=new HashMap<>();
+        getHttpClient().post().url(Constant.UPDATE_DIST_PRODUCT).params(Constant.makeParam(param)).build().execute(new StringCallback() {
+            @Override
+            public void onError(Call call, Exception e, int i) {
+                dismissLoadImg();
+                Utils.showToast(getContext(), R.string.server_error);
+            }
 
+            @Override
+            public void onResponse(String s, int i) {
+                dismissLoadImg();
+                Type type = new TypeToken<BaseObjResponse<MockObj>>() {
+                }.getType();
+                BaseObjResponse<MockObj> response = new Gson().fromJson(s, type);
+                if ("1".equals(response.getResult().getCode())) {
+                    Utils.showToast(getContext(), "添加成功！");
+                } else {
+                    Utils.showToast(getContext(), response.getResult().getMsg());
+                }
+            }
+        });
+    }
+
+    private void requestUnit() {
+        showLoadImg();
+        Map<String, String> map = new HashMap<>();
+        map.put("reqType", "3");
+        getHttpClient().post().url(Constant.DIC_URL).params(Constant.makeParam(map)).build().execute(new StringCallback() {
+            @Override
+            public void onError(Call call, Exception e, int i) {
+                dismissLoadImg();
+                Utils.showToast(getContext(), R.string.server_error);
+            }
+
+            @Override
+            public void onResponse(String s, int i) {
+                dismissLoadImg();
+//                String[] items=new String[]{"箱(CA)","打(DZ)","盒(BX)","包(PK)","ZNF","CC","个(EA)"};
+//                new TwDialogBuilder(getContext()).setItems("选择单位",items, new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialogInterface, int i) {
+//
+//                    }
+//                }).create().show();
+            }
+        });
     }
 }

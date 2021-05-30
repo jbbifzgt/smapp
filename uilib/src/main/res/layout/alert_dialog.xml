@@ -3,7 +3,7 @@
     android:id="@+id/parentPanel"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical" >
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -12,7 +12,7 @@
         android:layout_marginLeft="15dp"
         android:layout_marginRight="15dp"
         android:background="@drawable/selector_show_version_bg"
-        android:orientation="vertical" >
+        android:orientation="vertical">
 
         <LinearLayout
             android:id="@+id/header"
@@ -20,7 +20,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
-            android:layout_marginTop="5dp" >
+            android:layout_marginTop="5dp">
 
             <TextView
                 android:id="@+id/alertTitle"
@@ -58,14 +58,14 @@
             android:layout_width="fill_parent"
             android:layout_height="0dip"
             android:layout_weight="1"
-            android:orientation="vertical" >
+            android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
-                android:orientation="vertical" >
+                android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/message"
@@ -103,8 +103,7 @@
                 android:scrollbars="vertical"
                 android:textColor="@color/text_dark"
                 android:textSize="18sp"
-                android:visibility="gone" >
-            </EditText>
+                android:visibility="gone"></EditText>
 
             <ListView
                 android:id="@android:id/list"
@@ -122,7 +121,7 @@
             android:layout_marginTop="10dip"
             android:orientation="horizontal"
             android:paddingLeft="10dip"
-            android:paddingRight="10dip" >
+            android:paddingRight="10dip">
 
             <Button
                 android:id="@+id/button1"

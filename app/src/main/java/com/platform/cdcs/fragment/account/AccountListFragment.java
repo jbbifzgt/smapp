@@ -11,15 +11,29 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.platform.cdcs.R;
 import com.platform.cdcs.fragment.custom.AddRegNumberFragment;
+import com.platform.cdcs.model.BaseObjResponse;
+import com.platform.cdcs.model.CustomerItem;
+import com.platform.cdcs.model.DistCustomerList;
+import com.platform.cdcs.tool.Constant;
 import com.platform.cdcs.tool.FragmentUtil;
 import com.sherchen.slidetoggleheader.views.ObservableXListView;
 import com.trueway.app.uilib.adapter.EnhancedAdapter;
 import com.trueway.app.uilib.fragment.BaseFragment;
+import com.trueway.app.uilib.fragment.SearchListener;
 import com.trueway.app.uilib.model.ChooseItem;
 import com.trueway.app.uilib.tool.Utils;
 import com.trueway.app.uilib.widget.LetterBar;
+import com.zhy.http.okhttp.callback.StringCallback;
+
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.Map;
+
+import okhttp3.Call;
 
 /**
  * Created by holytang on 2017/9/28.
@@ -29,6 +43,7 @@ public class AccountListFragment extends BaseFragment {
     private ObservableXListView slideListView;
     private LetterBar letterBar;
     private ItemAdapter adapter;
+    private String custName = "";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -38,6 +53,7 @@ public class AccountListFragment extends BaseFragment {
 
     @Override
     public void initView(View view) {
+        initLoadImg(view.findViewById(R.id.load));
         getToolBar().setNavigationIcon(R.mipmap.icon_back);
         getToolBar().setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -48,6 +64,16 @@ public class AccountListFragment extends BaseFragment {
         setHasOptionsMenu(true);
         setTitle("我的客户");
         view.findViewById(R.id.search_layout).setVisibility(View.VISIBLE);
+        initSearch(view.findViewById(R.id.search), "输入产品型号查询", new SearchListener() {
+            @Override
+            public void search(String s) {
+                adapter.clear();
+                adapter.notifyDataSetChanged();
+                custName = s;
+                requestList();
+            }
+        }, view.findViewById(R.id.cancel));
+
         letterBar = (LetterBar) view.findViewById(R.id.letter_bar);
         letterBar.setOnLetterSelectListener(new LetterBar.OnLetterSelectListener() {
             @Override
@@ -58,7 +84,9 @@ public class AccountListFragment extends BaseFragment {
             }
         });
         slideListView = (ObservableXListView) view.findViewById(android.R.id.list);
+        slideListView.setPullRefreshEnable(false);
         slideListView.setAdapter(adapter);
+        requestList();
     }
 
     @Override
@@ -77,7 +105,37 @@ public class AccountListFragment extends BaseFragment {
         return R.layout.letter_list_view;
     }
 
-    private class ItemAdapter extends EnhancedAdapter<ChooseItem> {
+    private void requestList() {
+        showLoadImg();
+        Map<String, String> param = new HashMap<>();
+        param.put("custName", custName);
+//        param.put("orderType", "0");
+//        param.put("pageSize", "5000");
+        getHttpClient().post().url(Constant.DIST_CUSTOMER_LST).params(Constant.makeParam(param)).build().execute(new StringCallback() {
+            @Override
+            public void onError(Call call, Exception e, int i) {
+                dismissLoadImg();
+                Utils.showToast(getActivity(), R.string.server_error);
+            }
+
+            @Override
+            public void onResponse(String s, int i) {
+                dismissLoadImg();
+                //TODO
+                Type type = new TypeToken<BaseObjResponse<DistCustomerList>>() {
+                }.getType();
+                BaseObjResponse<DistCustomerList> response = new Gson().fromJson(s, type);
+                if ("1".equals(response.getResult().getCode())) {
+                    adapter.addAll(response.getResult().getDistCustomerList());
+                    adapter.notifyDataSetChanged();
+                } else {
+                    Utils.showToast(getContext(), response.getResult().getMsg());
+                }
+            }
+        });
+    }
+
+    private class ItemAdapter extends EnhancedAdapter<DistCustomerList.Customer> {
 
         private int mLineNumber = 0;
         private SparseArray<Integer> mKeyPositionMap = new SparseArray<>();
@@ -109,6 +167,7 @@ public class AccountListFragment extends BaseFragment {
         protected void bindView(View paramView, Context paramContext, int position) {
             TextView textView = (TextView) paramView;
             textView.setBackgroundResource(R.drawable.shape_corner_center);
+            textView.setText(getItem(position).getCustName());
         }
 
         @Override
@@ -122,6 +181,5 @@ public class AccountListFragment extends BaseFragment {
             textView.setLayoutParams(lp);
             return textView;
         }
-
     }
 }

@@ -43,21 +43,21 @@ public class TwSegmentWidget {
     }
 
     public TwSegmentWidget(GridView gridView, String[] menus, int[] drawables) {
-        this(gridView,menus,drawables,false);
+        this(gridView, menus, drawables, false);
     }
 
-    public TwSegmentWidget(GridView gridView, String[] menus, int[] drawables,boolean showLineFlag,int type) {
-        this(gridView,menus,drawables,showLineFlag);
-        this.type=type;
+    public TwSegmentWidget(GridView gridView, String[] menus, int[] drawables, boolean showLineFlag, int type) {
+        this(gridView, menus, drawables, showLineFlag);
+        this.type = type;
     }
 
-    public TwSegmentWidget(GridView gridView, String[] menus, int[] drawables,boolean showLineFlag) {
+    public TwSegmentWidget(GridView gridView, String[] menus, int[] drawables, boolean showLineFlag) {
         numColumn = menus.length;
         gridView.setNumColumns(numColumn);
         adapter = new ItemAdapter(gridView.getContext(), Arrays.asList(menus));
         gridView.setAdapter(adapter);
         arrorFlag = false;
-        this.showLineFlag=showLineFlag;
+        this.showLineFlag = showLineFlag;
         icons = drawables;
     }
 
@@ -67,7 +67,7 @@ public class TwSegmentWidget {
         adapter = new ItemAdapter(gridView.getContext(), Arrays.asList(menus));
         gridView.setAdapter(adapter);
         arrorFlag = false;
-        showLineFlag=false;
+        showLineFlag = false;
         imgs = drawables;
     }
 
@@ -142,6 +142,7 @@ public class TwSegmentWidget {
 
             if (showLineFlag) {
                 if (((position + 1) % numColumn) == 0) {
+                    vHolder.lineView.setVisibility(View.INVISIBLE);
                 } else {
                     vHolder.lineView.setVisibility(View.VISIBLE);
                 }
@@ -149,22 +150,22 @@ public class TwSegmentWidget {
                 vHolder.lineView.setVisibility(View.GONE);
             }
             if (icons != null) {
-                if(type==1){
-                    if(icons[position]!=0){
-                        vHolder.titleView.setCompoundDrawablesWithIntrinsicBounds(icons[position],0,0,0);
-                    }else{
-                        vHolder.titleView.setCompoundDrawablesWithIntrinsicBounds(0,0,0,0);
+                if (type == 1) {
+                    if (icons[position] != 0) {
+                        vHolder.titleView.setCompoundDrawablesWithIntrinsicBounds(icons[position], 0, 0, 0);
+                    } else {
+                        vHolder.titleView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
                     }
-                }else if(type==2){
-                    if(icons[position]!=0){
-                        vHolder.titleView.setCompoundDrawablesWithIntrinsicBounds(0,icons[position],0,0);
-                    }else{
-                        vHolder.titleView.setCompoundDrawablesWithIntrinsicBounds(0,0,0,0);
+                } else if (type == 2) {
+                    if (icons[position] != 0) {
+                        vHolder.titleView.setCompoundDrawablesWithIntrinsicBounds(0, icons[position], 0, 0);
+                    } else {
+                        vHolder.titleView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
                     }
-                }else{
+                } else {
                     vHolder.imgView.setImageResource(icons[position]);
                 }
-            }else if(imgs!=null){
+            } else if (imgs != null) {
 //                if(choose!=null&&currentIndex==position){
 //                    vHolder.imgView.setImageURI(choose[position]);
 //                }else{
@@ -172,18 +173,18 @@ public class TwSegmentWidget {
 //                }
             } else if (arrorFlag) {
             }
-            if(currentIndex==position){
+            if (currentIndex == position) {
                 vHolder.titleView.setSelected(true);
                 vHolder.imgView.setSelected(true);
                 vHolder.titleView.setTextColor(mContext.getResources().getColor(R.color.title_bg));
-                if(type==1||type==2) {
+                if (type == 1 || type == 2) {
                     vHolder.line1View.setVisibility(View.VISIBLE);
                 }
-            }else{
+            } else {
                 vHolder.titleView.setSelected(false);
                 vHolder.imgView.setSelected(false);
                 vHolder.titleView.setTextColor(mContext.getResources().getColor(R.color.text_gray));
-                if(type==1||type==2) {
+                if (type == 1 || type == 2) {
                     vHolder.line1View.setVisibility(View.INVISIBLE);
                 }
             }
@@ -195,8 +196,8 @@ public class TwSegmentWidget {
             ViewHolder holder = new ViewHolder();
             holder.titleView = (TextView) view.findViewById(R.id.title);
             holder.lineView = view.findViewById(R.id.line);
-            holder. line1View= view.findViewById(R.id.line1);
-            holder.imgView=(ImageView) view.findViewById(R.id.img);
+            holder.line1View = view.findViewById(R.id.line1);
+            holder.imgView = (ImageView) view.findViewById(R.id.img);
             if (height != 0) {
                 View mainView = view.findViewById(R.id.main);
                 RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, height);
@@ -205,9 +206,9 @@ public class TwSegmentWidget {
                 lp.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
                 holder.lineView.setLayoutParams(lp);
             }
-            if(type==1||type==2){
+            if (type == 1 || type == 2) {
                 holder.imgView.setVisibility(View.GONE);
-                holder. line1View.setVisibility(View.VISIBLE);
+                holder.line1View.setVisibility(View.VISIBLE);
             }
             view.setPadding(0, padding, 0, padding);
             view.setTag(holder);
@@ -221,7 +222,7 @@ public class TwSegmentWidget {
 
         private class ViewHolder {
             TextView titleView;
-            View lineView,line1View;
+            View lineView, line1View;
             ImageView imgView;
         }
     }

@@ -11,7 +11,14 @@ import android.widget.AbsListView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.platform.cdcs.MyApp;
 import com.platform.cdcs.R;
+import com.platform.cdcs.model.BaseObjResponse;
+import com.platform.cdcs.model.CustomerItem;
+import com.platform.cdcs.model.RegCodeItem;
+import com.platform.cdcs.tool.Constant;
 import com.platform.cdcs.tool.FragmentUtil;
 import com.platform.cdcs.tool.ViewTool;
 import com.sherchen.slidetoggleheader.views.ObservableXListView;
@@ -19,6 +26,13 @@ import com.trueway.app.uilib.adapter.EnhancedAdapter;
 import com.trueway.app.uilib.fragment.BaseFragment;
 import com.trueway.app.uilib.model.ChooseItem;
 import com.trueway.app.uilib.tool.Utils;
+import com.zhy.http.okhttp.callback.StringCallback;
+
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.Map;
+
+import okhttp3.Call;
 
 /**
  * Created by holytang on 2017/9/28.
@@ -37,6 +51,7 @@ public class RegNumberFragment extends BaseFragment {
     @Override
     public void initView(View view) {
         hideThisToolBar(view);
+        initLoadImg(view.findViewById(R.id.load));
         setHasOptionsMenu(true);
         getToolBar().setNavigationIcon(R.mipmap.icon_back);
         getToolBar().setNavigationOnClickListener(new View.OnClickListener() {
@@ -49,6 +64,7 @@ public class RegNumberFragment extends BaseFragment {
         slideListView = (ObservableXListView) view.findViewById(android.R.id.list);
         slideListView.setPullRefreshEnable(false);
         slideListView.setAdapter(adapter);
+        request();
     }
 
     @Override
@@ -67,7 +83,34 @@ public class RegNumberFragment extends BaseFragment {
         return R.layout.listview;
     }
 
-    private class ItemAdapter extends EnhancedAdapter<ChooseItem> {
+    private void request() {
+        showLoadImg();
+        Map<String, String> param = new HashMap<>();
+        param.put("distProductId", getArguments().getString("id"));
+        getHttpClient().post().url(Constant.DIST_PRODUCT_REG_LST).params(Constant.makeParam(param)).build().execute(new StringCallback() {
+            @Override
+            public void onError(Call call, Exception e, int i) {
+                dismissLoadImg();
+                Utils.showToast(getContext(), R.string.server_error);
+            }
+
+            @Override
+            public void onResponse(String s, int i) {
+                dismissLoadImg();
+                Type type = new TypeToken<BaseObjResponse<RegCodeItem.RegCodeList>>() {
+                }.getType();
+                BaseObjResponse<RegCodeItem.RegCodeList> response = new Gson().fromJson(s, type);
+                if ("1".equals(response.getResult().getCode())) {
+                    adapter.addAll(response.getResult().getRegList());
+                    adapter.notifyDataSetChanged();
+                } else {
+                    Utils.showToast(getContext(), response.getResult().getMsg());
+                }
+            }
+        });
+    }
+
+    private class ItemAdapter extends EnhancedAdapter<RegCodeItem> {
 
         public ItemAdapter(Context context) {
             super(context);
@@ -76,7 +119,14 @@ public class RegNumberFragment extends BaseFragment {
         @Override
         protected void bindView(View paramView, Context paramContext, int position) {
             ViewHolder holder = (ViewHolder) paramView.getTag();
-            ChooseItem item = getItem(position);
+            RegCodeItem item = getItem(position);
+            holder.codeView.setText(item.getBatchNumber());
+            holder.titleView.setText(item.getUpdateOperName());
+            holder.createTime.setText(item.getFillDate());
+            holder.codeView.setText(item.getFillDate());
+            holder.endTime.setText(item.getExpirationDate());
+            holder.modifyTime.setText(item.getUpdateDate());
+            holder.modifyPerson.setText(MyApp.getInstance().getAccount().getUserName());
         }
 
         @Override

@@ -14,6 +14,7 @@ public class ChooseItem implements Serializable{
     private int drawable;
     private String time;
     private String imageurl;
+    private String bigImgUrl;
     private String  status;
     private int type;
     private boolean showRight;
@@ -108,5 +109,13 @@ public class ChooseItem implements Serializable{
 
     public void setShowRight(boolean showRight) {
         this.showRight = showRight;
+    }
+
+    public String getBigImgUrl() {
+        return bigImgUrl;
+    }
+
+    public void setBigImgUrl(String bigImgUrl) {
+        this.bigImgUrl = bigImgUrl;
     }
 }

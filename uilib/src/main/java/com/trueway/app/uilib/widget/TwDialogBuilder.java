@@ -163,9 +163,9 @@ public class TwDialogBuilder {
         return this;
     }
 
-    public TwDialogBuilder setItems(String[] args,
+    public TwDialogBuilder setItems( String title,String[] args,
                                     final DialogInterface.OnClickListener listener) {
-        setTitle(R.string.attention);
+        setTitle(title);
         ItemAdapter adapter = new ItemAdapter(mContext, Arrays.asList(args));
         ListView listview = (ListView) mD.findViewById(android.R.id.list);
         listview.setVisibility(View.VISIBLE);
@@ -302,7 +302,7 @@ public class TwDialogBuilder {
             int size = Utils.convertDIP2PX(context, 10);
             LinearLayout.LayoutParams textLp = new LinearLayout.LayoutParams(
                     LayoutParams.MATCH_PARENT, size * 4);
-            textLp.setMargins(0, size/2, 0,size/2);
+            textLp.setMargins(0, size / 2, 0, size / 2);
             textView.setLayoutParams(textLp);
             try {
                 int statePressed = android.R.attr.state_pressed;
@@ -346,21 +346,21 @@ public class TwDialogBuilder {
                 @Override
                 public void onClick(View v) {
                     Integer position = (Integer) v.getTag();
-                    if(getItem(position).isCheck()){
+                    if (getItem(position).isCheck()) {
                         getItem(position).setIsCheck(false);
-                    }else{
+                    } else {
                         getItem(position).setIsCheck(true);
                     }
                     notifyDataSetChanged();
                 }
             });
             holder.checkBox.setText(item.getTitle());
-            if(position==getCount()-1){
+            if (position == getCount() - 1) {
                 holder.editText.setVisibility(View.VISIBLE);
                 holder.headerView.setText(item.getTitle());
                 holder.headerView.setVisibility(View.VISIBLE);
                 holder.checkBox.setVisibility(View.GONE);
-            }else{
+            } else {
                 holder.editText.setVisibility(View.GONE);
                 holder.headerView.setVisibility(View.GONE);
                 holder.checkBox.setVisibility(View.VISIBLE);
@@ -392,7 +392,7 @@ public class TwDialogBuilder {
             ViewHolder holder = new ViewHolder();
             holder.checkBox = (TextView) rootView.findViewById(R.id.check);
             holder.editText = (EditText) rootView.findViewById(R.id.content);
-            holder.headerView=(TextView)rootView.findViewById(R.id.title);
+            holder.headerView = (TextView) rootView.findViewById(R.id.title);
             rootView.setTag(holder);
             return rootView;
         }

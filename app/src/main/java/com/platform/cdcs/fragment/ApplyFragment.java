@@ -10,12 +10,19 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.platform.cdcs.R;
+import com.platform.cdcs.tool.Constant;
 import com.platform.cdcs.tool.FragmentUtil;
 import com.sherchen.slidetoggleheader.views.ObservableXListView;
 import com.trueway.app.uilib.adapter.EnhancedAdapter;
 import com.trueway.app.uilib.fragment.BaseFragment;
 import com.trueway.app.uilib.model.ChooseItem;
 import com.trueway.app.uilib.tool.Utils;
+import com.zhy.http.okhttp.callback.StringCallback;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import okhttp3.Call;
 
 /**
  * Created by holytang on 2017/9/28.
@@ -28,14 +35,11 @@ public class ApplyFragment extends BaseFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         adapter = new ItemAdapter(getContext());
-        ChooseItem item = new ChooseItem();
-        item.setTitle("江苏运海医疗器械有限公司");
-        item.setType(1);
-        adapter.addItem(item);
     }
 
     @Override
     public void initView(View view) {
+        initLoadImg(view.findViewById(R.id.load));
         setHasOptionsMenu(true);
         hideThisToolBar(view);
         setTitle("代报申请");
@@ -55,6 +59,7 @@ public class ApplyFragment extends BaseFragment {
         slideListView = (ObservableXListView) view.findViewById(android.R.id.list);
         slideListView.addHeaderView(textView);
         slideListView.setAdapter(adapter);
+        request();
     }
 
     protected void initMenu(Menu menu, MenuInflater inflater) {
@@ -70,6 +75,24 @@ public class ApplyFragment extends BaseFragment {
     @Override
     public int layoutId() {
         return R.layout.listview;
+    }
+
+    private void request() {
+        showLoadImg();
+        Map<String, String> param = new HashMap<>();
+        param.put("distApplyName", "");
+        getHttpClient().post().url(Constant.OTHER_REPORT_LST).params(Constant.makeParam(param)).build().execute(new StringCallback() {
+            @Override
+            public void onError(Call call, Exception e, int i) {
+                dismissLoadImg();
+                Utils.showToast(getActivity(), R.string.server_error);
+            }
+
+            @Override
+            public void onResponse(String s, int i) {
+                dismissLoadImg();
+            }
+        });
     }
 
     private class ItemAdapter extends EnhancedAdapter<ChooseItem> {

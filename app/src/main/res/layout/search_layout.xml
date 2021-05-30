@@ -15,7 +15,7 @@
         android:background="@drawable/shape_corner"
         android:drawablePadding="10dp"
         android:gravity="center_vertical"
-        android:hint="输入客户名称搜索"
+        android:imeOptions="actionSearch"
         android:paddingBottom="5dp"
         android:paddingLeft="5dp"
         android:paddingRight="20dp"
