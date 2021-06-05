@@ -1,6 +1,12 @@
 package com.platform.cdcs.tool;
 
+import android.content.Context;
+import android.graphics.Color;
 import android.text.InputType;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.RelativeSizeSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -96,7 +102,7 @@ public class ViewTool {
         View rootView = setFourItem(inflater, parent, labels, values);
         ((TextView) rootView.findViewById(R.id.title1)).setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.input_star, 0);
         ((TextView) rootView.findViewById(R.id.title2)).setCompoundDrawablesWithIntrinsicBounds(0, 0, R.mipmap.input_star, 0);
-        TextView[] tvs=new TextView[]{(TextView) rootView.findViewById(R.id.text1),(TextView) rootView.findViewById(R.id.text2)};
+        TextView[] tvs = new TextView[]{(TextView) rootView.findViewById(R.id.text1), (TextView) rootView.findViewById(R.id.text2)};
         return tvs;
     }
 
@@ -159,5 +165,17 @@ public class ViewTool {
         ((TextView) rootView.findViewById(R.id.text2)).setText(texts[1]);
         ((TextView) rootView.findViewById(R.id.title3)).setText(titles[2]);
         ((TextView) rootView.findViewById(R.id.text3)).setText(texts[2]);
+    }
+
+    public static SpannableString makeQtyAndUnit(Context context, String nowqty, String qty, String unit) {
+        SpannableString ss = new SpannableString(String.format("%s /%s %s", nowqty, qty, unit));
+        ss.setSpan(new ForegroundColorSpan(context.getResources().getColor(R.color.title_bg)), 0, nowqty.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return ss;
+    }
+
+    public static SpannableString makeArrorDown(String text, String arror) {
+        SpannableString ss = new SpannableString(String.format("%s %s", text, arror));
+        ss.setSpan(new RelativeSizeSpan(0.8f), text.length(), ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return ss;
     }
 }

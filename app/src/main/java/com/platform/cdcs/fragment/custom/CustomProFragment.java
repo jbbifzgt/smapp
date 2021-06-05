@@ -19,6 +19,7 @@ import com.platform.cdcs.R;
 import com.platform.cdcs.model.BaseObjResponse;
 import com.platform.cdcs.model.CustomerItem;
 import com.platform.cdcs.model.DisProductList;
+import com.platform.cdcs.model.RefershEvent;
 import com.platform.cdcs.tool.Constant;
 import com.platform.cdcs.tool.FragmentUtil;
 import com.sherchen.slidetoggleheader.views.ObservableXListView;
@@ -35,6 +36,8 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.greenrobot.event.EventBus;
+import de.greenrobot.event.Subscribe;
 import okhttp3.Call;
 
 /**
@@ -51,6 +54,13 @@ public class CustomProFragment extends BaseFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         adapter = new ItemAdapter(getContext());
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -95,21 +105,21 @@ public class CustomProFragment extends BaseFragment {
         slideListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-               final  DisProductList.DisProduct item = (DisProductList.DisProduct) adapterView.getItemAtPosition(i);
-                if(item!=null){
-                    new TwDialogBuilder(getContext()).setItems(new String[]{"注册证号","价格列表"}, new DialogInterface.OnClickListener() {
+                final DisProductList.DisProduct item = (DisProductList.DisProduct) adapterView.getItemAtPosition(i);
+                if (item != null) {
+                    new TwDialogBuilder(getContext()).setItems(new String[]{"注册证号", "价格列表"}, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
-                            Bundle bundle=new Bundle();
-                            bundle.putString("id",item.getId());
-                            if(i==0){
-                                FragmentUtil.navigateToInNewActivity(getActivity(),RegNumberFragment.class,bundle);
-                            }else{
-                                bundle.putString("itemCode",item.getMaterialStCode());
-                                FragmentUtil.navigateToInNewActivity(getActivity(),PriceListFragment.class,bundle);
+                            Bundle bundle = new Bundle();
+                            bundle.putString("id", item.getId());
+                            if (i == 0) {
+                                FragmentUtil.navigateToInNewActivity(getActivity(), RegNumberFragment.class, bundle);
+                            } else {
+                                bundle.putString("itemCode", item.getMaterialStCode());
+                                FragmentUtil.navigateToInNewActivity(getActivity(), PriceListFragment.class, bundle);
                             }
                         }
-                    },"").create().show();
+                    }, "").create().show();
                 }
             }
         });
@@ -175,6 +185,16 @@ public class CustomProFragment extends BaseFragment {
         });
     }
 
+    @Subscribe
+    public void onEventMainThread(RefershEvent event) {
+        if (event.mclass == getClass()) {
+            pageIndex = 1;
+            adapter.clear();
+            adapter.notifyDataSetChanged();
+            request(true, searchName);
+        }
+    }
+
     private class ItemAdapter extends EnhancedAdapter<DisProductList.DisProduct> {
 
         public ItemAdapter(Context context) {
@@ -204,5 +224,4 @@ public class CustomProFragment extends BaseFragment {
     private class ViewHoder {
         TextView titleView, textView;
     }
-
 }

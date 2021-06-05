@@ -3,6 +3,7 @@ package com.platform.cdcs.fragment.choose;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -10,6 +11,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -18,6 +20,7 @@ import com.platform.cdcs.R;
 import com.platform.cdcs.fragment.account.AccountRegFragment;
 import com.platform.cdcs.model.BaseObjResponse;
 import com.platform.cdcs.model.DistCustomerList;
+import com.platform.cdcs.model.RefershEvent;
 import com.platform.cdcs.tool.Constant;
 import com.platform.cdcs.tool.FragmentUtil;
 import com.sherchen.slidetoggleheader.views.ObservableXListView;
@@ -33,6 +36,7 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.greenrobot.event.EventBus;
 import okhttp3.Call;
 
 /**
@@ -46,11 +50,15 @@ public class AccountChooseFragment extends BaseFragment {
     private String custName = "";
     private String cusType = "", provience = "", city = "";
     private TextView typeTV, cityTV, proTV;
+    private String mClass = "";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         adapter = new ItemAdapter(getContext());
+        if (getArguments() != null) {
+            mClass = getArguments().getString("class");
+        }
     }
 
     @Override
@@ -108,6 +116,30 @@ public class AccountChooseFragment extends BaseFragment {
             }
         });
         slideListView = (ObservableXListView) view.findViewById(android.R.id.list);
+        slideListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                if (TextUtils.isEmpty(mClass)) {
+                    return;
+                }
+                //TODO
+                DistCustomerList.Customer customer = adapter.getItem(i);
+                if (customer == null) {
+                    return;
+                }
+                RefershEvent event = new RefershEvent();
+                try {
+                    event.mclass = Class.forName(mClass);
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+                event.oclass = AccountChooseFragment.class;
+                event.bundle = new Bundle();
+                event.bundle.putString("code", customer.getCustCode());
+                event.bundle.putString("name", customer.getCustName());
+                EventBus.getDefault().post(event);
+            }
+        });
         slideListView.setPullRefreshEnable(false);
         slideListView.setAdapter(adapter);
         requestList();

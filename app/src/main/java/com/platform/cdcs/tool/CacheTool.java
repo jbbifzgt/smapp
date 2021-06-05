@@ -127,10 +127,10 @@ public class CacheTool {
             if (!inputList.contains(item)) {
                 inputList.add(item);
             } else {
-                ProductList.ProductItem subItem = inputList.get(inputList.indexOf(item));
+                //ProductList.ProductItem subItem = inputList.get(inputList.indexOf(item));
                 //TODO 增加数量
-                subItem.setQty(String.valueOf(Float.parseFloat(item.getQty()) + Float.parseFloat(subItem.getQty())));
-                item = subItem;
+//                subItem.setQty(String.valueOf(Float.parseFloat(item.getQty()) + Float.parseFloat(subItem.getQty())));
+//                item = subItem;
             }
         } else {
             if (outputList == null) {
@@ -139,8 +139,8 @@ public class CacheTool {
             if (!outputList.contains(item)) {
                 outputList.add(item);
             } else {
-                item = outputList.get(outputList.indexOf(item));
-                item.setQty(String.valueOf(Integer.parseInt(item.getQty()) + 1));
+//                item = outputList.get(outputList.indexOf(item));
+//                item.setQty(String.valueOf(Integer.parseInt(item.getQty()) + 1));
             }
         }
         return item;

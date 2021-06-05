@@ -44,6 +44,9 @@ public class ProductList extends MockObj {
         private String productNum;
         private String subBU;
         private String defaultUnit;
+        private boolean choose;
+        //当前数量
+        private String nowqty;
 
         public static List<ProductItem> parseList(String array) throws JSONException {
             List<ProductItem> list = new ArrayList<>();
@@ -57,6 +60,8 @@ public class ProductList extends MockObj {
                 item.setSubBU(obj.getString("subBU"));
                 item.setUom(obj.getString("unit"));
                 item.setQty(obj.getString("num"));
+                item.setNowqty(obj.getString("nowqty"));
+
                 list.add(item);
             }
             return list;
@@ -72,6 +77,22 @@ public class ProductList extends MockObj {
                 }
             }
             return array.toString();
+        }
+
+        public String getNowqty() {
+            return nowqty;
+        }
+
+        public void setNowqty(String nowqty) {
+            this.nowqty = nowqty;
+        }
+
+        public boolean isChoose() {
+            return choose;
+        }
+
+        public void setChoose(boolean choose) {
+            this.choose = choose;
         }
 
         public String getDefaultUnit() {
@@ -189,6 +210,7 @@ public class ProductList extends MockObj {
             object.put("subBU", subBU);
             object.put("unit", uom);
             object.put("num", qty);
+            object.put("nowqty", 0);
             return object;
         }
 

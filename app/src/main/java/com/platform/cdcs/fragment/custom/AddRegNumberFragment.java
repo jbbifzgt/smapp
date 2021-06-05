@@ -15,6 +15,7 @@ import com.platform.cdcs.R;
 import com.platform.cdcs.fragment.choose.AccountChooseFragment;
 import com.platform.cdcs.model.BaseObjResponse;
 import com.platform.cdcs.model.MockObj;
+import com.platform.cdcs.model.RefershEvent;
 import com.platform.cdcs.model.SubBUItem;
 import com.platform.cdcs.tool.Constant;
 import com.platform.cdcs.tool.FragmentUtil;
@@ -31,6 +32,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.greenrobot.event.EventBus;
+import de.greenrobot.event.Subscribe;
 import okhttp3.Call;
 
 /**
@@ -38,11 +41,18 @@ import okhttp3.Call;
  */
 public class AddRegNumberFragment extends BaseFragment {
 
-    private EditText lineET, lineNameET;
+    private EditText lineET, lineNameET, clientNameET, clientCodeET;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -84,17 +94,20 @@ public class AddRegNumberFragment extends BaseFragment {
         });
         unitET.setHint("请选择单位");
         LinearLayout root2 = (LinearLayout) view.findViewById(R.id.button2);
-        EditText clientNameET = ViewTool.createEditItem(inflater, "客户名称", root2, false, true);
+        clientNameET = ViewTool.createEditItem(inflater, "客户名称", root2, false, true);
         clientNameET.setInputType(InputType.TYPE_NULL);
         clientNameET.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                FragmentUtil.navigateToInNewActivity(getActivity(), AccountChooseFragment.class, null);
+                Bundle bundle = new Bundle();
+                bundle.putString("class", String.valueOf(AddRegNumberFragment.this.getClass()));
+                FragmentUtil.navigateToInNewActivity(getActivity(), AccountChooseFragment.class, bundle);
             }
         });
         clientNameET.setHint("请选择客户名称");
 
-        EditText clientCodeET = ViewTool.createEditItemNoLine(inflater, "客户代码", root2, false, false);
+        clientCodeET = ViewTool.createEditItemNoLine(inflater, "客户代码", root2, false, false);
+        clientCodeET.setEnabled(false);
 
         LinearLayout root3 = (LinearLayout) view.findViewById(R.id.button3);
         lineET = ViewTool.createEditItem(inflater, "产品线", root2, false, true);
@@ -188,8 +201,8 @@ public class AddRegNumberFragment extends BaseFragment {
     private void postClick() {
         //TODO
         showLoadImg();
-        
-        Map<String,String> param=new HashMap<>();
+
+        Map<String, String> param = new HashMap<>();
         getHttpClient().post().url(Constant.UPDATE_DIST_PRODUCT).params(Constant.makeParam(param)).build().execute(new StringCallback() {
             @Override
             public void onError(Call call, Exception e, int i) {
@@ -235,5 +248,18 @@ public class AddRegNumberFragment extends BaseFragment {
 //                }).create().show();
             }
         });
+    }
+
+    @Subscribe
+    public void onEventMainThread(RefershEvent event) {
+        if (event.mclass == getClass()) {
+            if(event.oclass==AccountChooseFragment.class){
+                String code = event.bundle.getString("code");
+                String name = event.bundle.getString("name");
+                clientNameET.setText(name);
+                clientCodeET.setText(code);
+            }
+
+        }
     }
 }

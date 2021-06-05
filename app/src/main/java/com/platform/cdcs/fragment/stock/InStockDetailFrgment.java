@@ -1,6 +1,7 @@
 package com.platform.cdcs.fragment.stock;
 
 import android.content.Context;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -22,15 +23,17 @@ import java.util.Map;
 import okhttp3.Call;
 
 /**
- * Created by holytang on 2017/10/15.
+ * Created by holytang on 2017/10/30.
  */
-public class InStockFragment extends BaseFragment {
+public class InStockDetailFrgment extends BaseFragment {
+
 
     private ItemAdapter adapter;
+    private TextView titleView;
 
     @Override
     public void initView(View view) {
-        adapter=new ItemAdapter(getContext());
+        adapter = new ItemAdapter(getContext());
         initLoadImg(view.findViewById(R.id.load));
         hideThisToolBar(view);
         getToolBar().setNavigationIcon(R.mipmap.icon_back);
@@ -42,10 +45,19 @@ public class InStockFragment extends BaseFragment {
         });
         setTitle("在库");
         ObservableXListView listView = (ObservableXListView) view.findViewById(android.R.id.list);
+        View headerView = LayoutInflater.from(getContext()).inflate(R.layout.left_right, null);
+        titleView = (TextView) headerView.findViewById(R.id.title);
+        titleView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //TODO 库位选择
+            }
+        });
+        listView.addHeaderView(headerView);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                FragmentUtil.navigateToInNewActivity(getActivity(),InStockDetailFrgment.class,null);
+                //详情页面
             }
         });
         listView.setPullRefreshEnable(false);
@@ -58,10 +70,10 @@ public class InStockFragment extends BaseFragment {
         return R.layout.listview;
     }
 
-    private void requestList(){
+    private void requestList() {
         showLoadImg();
-        Map<String,String> param=new HashMap<>();
-        param.put("stockId",getArguments().getString("id"));
+        Map<String, String> param = new HashMap<>();
+        param.put("stockId", getArguments().getString("id"));
         getHttpClient().post().url(Constant.DIST_ITEMCODESUBBU_LST).params(param).build().execute(new StringCallback() {
             @Override
             public void onError(Call call, Exception e, int i) {
@@ -94,7 +106,8 @@ public class InStockFragment extends BaseFragment {
 
         @Override
         protected View newView(Context context, int position, ViewGroup viewgroup) {
-            View rootView = inflater.inflate(R.layout.four_item, viewgroup, false);
+            View rootView = null;
+            rootView = inflater.inflate(R.layout.four_item, viewgroup, false);
             rootView.setBackgroundResource(R.drawable.shape_corner_center);
             ViewHolder holder = new ViewHolder();
             holder.titleView = (TextView) rootView.findViewById(R.id.title);
@@ -105,6 +118,7 @@ public class InStockFragment extends BaseFragment {
             rootView.setTag(holder);
             return rootView;
         }
+
     }
 
     private class ViewHolder {

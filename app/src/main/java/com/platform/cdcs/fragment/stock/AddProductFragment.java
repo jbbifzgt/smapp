@@ -23,6 +23,7 @@ import com.platform.cdcs.fragment.choose.PHFragment;
 import com.platform.cdcs.fragment.choose.ProductTypeFragment;
 import com.platform.cdcs.model.BaseObjResponse;
 import com.platform.cdcs.model.HouseItem;
+import com.platform.cdcs.model.RefershEvent;
 import com.platform.cdcs.tool.Constant;
 import com.platform.cdcs.tool.FragmentUtil;
 import com.platform.cdcs.tool.ViewTool;
@@ -39,6 +40,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.greenrobot.event.EventBus;
+import de.greenrobot.event.Subscribe;
 import okhttp3.Call;
 
 /**
@@ -50,6 +53,7 @@ public class AddProductFragment extends BaseFragment {
 
     private EditText unitET;
     private View titleView;
+    private EditText nameET;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,6 +61,13 @@ public class AddProductFragment extends BaseFragment {
         if (getArguments() != null) {
             model = getArguments().getInt("model");
         }
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -78,12 +89,14 @@ public class AddProductFragment extends BaseFragment {
         });
         LayoutInflater inflater = LayoutInflater.from(getContext());
         LinearLayout rootView1 = (LinearLayout) view.findViewById(R.id.button1);
-        EditText nameET = ViewTool.createEditItem(inflater, "产品型号", rootView1, true, true);
+        nameET = ViewTool.createEditItem(inflater, "产品型号", rootView1, true, true);
         nameET.setHint("请选择产品型号");
         nameET.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                FragmentUtil.navigateToInNewActivity(getActivity(), ProductTypeFragment.class, null);
+                Bundle bundle = new Bundle();
+                bundle.putString("class", String.valueOf(AddProductFragment.this.getClass()));
+                FragmentUtil.navigateToInNewActivity(getActivity(), ProductTypeFragment.class, bundle);
             }
         });
 
@@ -231,4 +244,10 @@ public class AddProductFragment extends BaseFragment {
         });
         window.show((View) titleView.getParent());
     }
+
+    @Subscribe
+    public void onEventMainThread(RefershEvent event) {
+        nameET.setText(event.bundle.getString("code"));
+    }
+
 }

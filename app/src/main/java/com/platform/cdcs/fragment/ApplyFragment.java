@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.platform.cdcs.R;
+import com.platform.cdcs.model.RefershEvent;
 import com.platform.cdcs.tool.Constant;
 import com.platform.cdcs.tool.FragmentUtil;
 import com.sherchen.slidetoggleheader.views.ObservableXListView;
@@ -22,6 +23,8 @@ import com.zhy.http.okhttp.callback.StringCallback;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.greenrobot.event.EventBus;
+import de.greenrobot.event.Subscribe;
 import okhttp3.Call;
 
 /**
@@ -35,6 +38,13 @@ public class ApplyFragment extends BaseFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         adapter = new ItemAdapter(getContext());
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -93,6 +103,13 @@ public class ApplyFragment extends BaseFragment {
                 dismissLoadImg();
             }
         });
+    }
+
+    @Subscribe
+    public void onEventMainThread(RefershEvent event) {
+        if (event.mclass == this.getClass()) {
+            request();
+        }
     }
 
     private class ItemAdapter extends EnhancedAdapter<ChooseItem> {

@@ -18,6 +18,7 @@ import com.platform.cdcs.fragment.custom.AddRegNumberFragment;
 import com.platform.cdcs.model.BaseObjResponse;
 import com.platform.cdcs.model.CustomerItem;
 import com.platform.cdcs.model.DistCustomerList;
+import com.platform.cdcs.model.RefershEvent;
 import com.platform.cdcs.tool.Constant;
 import com.platform.cdcs.tool.FragmentUtil;
 import com.sherchen.slidetoggleheader.views.ObservableXListView;
@@ -33,6 +34,8 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.greenrobot.event.EventBus;
+import de.greenrobot.event.Subscribe;
 import okhttp3.Call;
 
 /**
@@ -49,6 +52,13 @@ public class AccountListFragment extends BaseFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         adapter = new ItemAdapter(getContext());
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -133,6 +143,15 @@ public class AccountListFragment extends BaseFragment {
                 }
             }
         });
+    }
+
+    @Subscribe
+    public void onEventMainThread(RefershEvent event) {
+        if (event.mclass == getClass()) {
+            adapter.clear();
+            adapter.notifyDataSetChanged();
+            requestList();
+        }
     }
 
     private class ItemAdapter extends EnhancedAdapter<DistCustomerList.Customer> {

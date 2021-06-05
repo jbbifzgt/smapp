@@ -20,11 +20,13 @@ import com.platform.cdcs.model.ProductList;
 import com.platform.cdcs.model.RefershEvent;
 import com.platform.cdcs.tool.CacheTool;
 import com.platform.cdcs.tool.FragmentUtil;
+import com.platform.cdcs.tool.ViewTool;
 import com.platform.cdcs.widget.FormDialog;
 import com.sherchen.slidetoggleheader.views.ObservableXListView;
 import com.trueway.app.uilib.adapter.EnhancedAdapter;
 import com.trueway.app.uilib.fragment.BaseFragment;
 import com.trueway.app.uilib.model.ChooseItem;
+import com.trueway.app.uilib.tool.Utils;
 import com.trueway.app.uilib.widget.TwDialogBuilder;
 import com.tubb.smrv.SwipeHorizontalMenuLayout;
 
@@ -168,8 +170,7 @@ public class EditProductFragment extends BaseFragment {
             ProductList.ProductItem item = getItem(position);
             holder.titleView.setText(item.getSerialNumber());
             holder.textView.setText(item.getMaterialName());
-            //TODO 此处需要修改
-            holder.dateView.setText(item.getSaleUnit());
+            holder.dateView.setText(ViewTool.makeQtyAndUnit(getContext(), item.getNowqty(), item.getQty(), item.getSaleUnit()));
             holder.leftBtn.setTag(item);
             holder.rightBtn.setTag(item);
         }

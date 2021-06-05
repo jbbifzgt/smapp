@@ -29,6 +29,7 @@ import com.platform.cdcs.model.SubBUItem;
 import com.platform.cdcs.tool.CacheTool;
 import com.platform.cdcs.tool.Constant;
 import com.platform.cdcs.tool.FragmentUtil;
+import com.platform.cdcs.tool.ViewTool;
 import com.platform.cdcs.widget.ChooseWindow;
 import com.sherchen.slidetoggleheader.views.ObservableXListView;
 import com.sherchen.slidetoggleheader.views.XListView;
@@ -90,7 +91,7 @@ public class ProductFragment extends BaseFragment {
         numView = (TextView) view.findViewById(R.id.num);
         refershNum();
         typeView = (TextView) view.findViewById(R.id.text);
-        typeView.setText("全部产品线 ▼");
+        typeView.setText(ViewTool.makeArrorDown("全部产品线", "▼"));
         TextView pieView = (TextView) view.findViewById(R.id.button1);
         pieView.setCompoundDrawablesWithIntrinsicBounds(R.mipmap.icon_pie, 0, 0, 0);
         pieView.setOnClickListener(new View.OnClickListener() {
@@ -132,12 +133,12 @@ public class ProductFragment extends BaseFragment {
                 subBU = window.getChoose();
                 if (!TextUtils.isEmpty(subBU)) {
                     if (subBU.contains(",")) {
-                        typeView.setText(subBU.substring(0, subBU.indexOf(",")) + "等" + " ▼");
+                        typeView.setText(ViewTool.makeArrorDown(subBU.substring(0, subBU.indexOf(",")) + "等", "▼"));
                     } else {
-                        typeView.setText(subBU + " ▼");
+                        typeView.setText(ViewTool.makeArrorDown(subBU, "▼"));
                     }
                 } else {
-                    typeView.setText("全部产品线" + " ▼");
+                    typeView.setText(ViewTool.makeArrorDown("全部产品线", "▼"));
                 }
                 pageIndex = 1;
                 adapter.clear();
@@ -185,7 +186,7 @@ public class ProductFragment extends BaseFragment {
                         index++;
                     }
                     if (items.size() > 0) {
-                        titleView.setText(items.get(0).getWhName() + " ▼");
+                        titleView.setText(ViewTool.makeArrorDown(items.get(0).getWhName(), " ▼"));
                         titleView.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
@@ -193,7 +194,7 @@ public class ProductFragment extends BaseFragment {
                                     @Override
                                     public void onClick(DialogInterface dialogInterface, int i) {
                                         currentItem = items.get(i);
-                                        titleView.setText(items.get(i).getWhName() + " ▼");
+                                        titleView.setText(ViewTool.makeArrorDown(items.get(i).getWhName(), " ▼"));
                                         pageIndex = 1;
                                         adapter.clear();
                                         adapter.notifyDataSetChanged();

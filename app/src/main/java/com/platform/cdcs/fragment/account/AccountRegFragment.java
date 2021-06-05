@@ -14,6 +14,7 @@ import com.platform.cdcs.R;
 import com.platform.cdcs.fragment.choose.AccountChooseFragment;
 import com.platform.cdcs.model.BaseObjResponse;
 import com.platform.cdcs.model.MockObj;
+import com.platform.cdcs.model.RefershEvent;
 import com.platform.cdcs.tool.Constant;
 import com.platform.cdcs.tool.FragmentUtil;
 import com.platform.cdcs.tool.ViewTool;
@@ -25,6 +26,8 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.greenrobot.event.EventBus;
+import de.greenrobot.event.Subscribe;
 import okhttp3.Call;
 
 /**
@@ -38,6 +41,13 @@ public class AccountRegFragment extends BaseFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -58,13 +68,15 @@ public class AccountRegFragment extends BaseFragment {
         nameET.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                FragmentUtil.navigateToInNewActivity(getActivity(), AccountChooseFragment.class, null);
+                Bundle bundle = new Bundle();
+                bundle.putString("class", String.valueOf(AccountRegFragment.this.getClass()));
+                FragmentUtil.navigateToInNewActivity(getActivity(), AccountChooseFragment.class, bundle);
             }
         });
         nameET.setHint("请选择");
         codeET = ViewTool.createEditItem(inflater, "标准代码", rootView, true, false);
         codeET.setHint("请输入标准代码");
-
+        codeET.setEnabled(false);
         numberET = ViewTool.createEditItem(inflater, "自定义客户代码", rootView, false, false);
         numberET.setHint("请输入自定义客户代码");
 
@@ -124,5 +136,15 @@ public class AccountRegFragment extends BaseFragment {
                 }
             }
         });
+    }
+
+    @Subscribe
+    public void onEventMainThread(RefershEvent event) {
+        if (event.mclass == getClass()) {
+            String code = event.bundle.getString("code");
+            String name = event.bundle.getString("name");
+            nameET.setText(name);
+            codeET.setText(code);
+        }
     }
 }
