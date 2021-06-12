@@ -44,7 +44,9 @@ public class EditProductFragment extends BaseFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        model = getArguments().getInt("model", 0);
+        if (getArguments() != null) {
+            model = getArguments().getInt("model", 0);
+        }
         adapter = new ItemAdapter(getContext());
         if (model == 0) {
             adapter.addAll(CacheTool.getInputList(getContext()));
@@ -97,6 +99,12 @@ public class EditProductFragment extends BaseFragment {
                         } else {
                             CacheTool.clearOutputCache(getContext());
                         }
+                        adapter.clear();
+                        adapter.notifyDataSetChanged();
+                        titleView.setText(String.format("已添加 %s 件产品", model == 0 ? CacheTool.getInputCount(getContext()) : CacheTool.getOutputCount(getContext())));
+                        RefershEvent event = new RefershEvent();
+                        event.mclass = ProductFragment.class;
+                        EventBus.getDefault().post(event);
                     }
                 }).create().show();
             }
@@ -134,11 +142,21 @@ public class EditProductFragment extends BaseFragment {
                 new FormDialog(getContext(), new FormDialog.FormListener() {
                     @Override
                     public void okClick(String[] value) {
-                        item.setQty(value[0]);
-                        CacheTool.changeNum(getContext(), model, item.getSerialNumber(), value[0]);
-                        adapter.notifyDataSetChanged();
+                        try {
+                            float max = Float.parseFloat(item.getQty());
+                            float now = Float.parseFloat(value[0]);
+                            if (now > max || now < 0) {
+                                Utils.showToast(getContext(), "输入数量不合法！");
+                                return;
+                            }
+                            item.setNowqty(value[0]);
+                            CacheTool.changeNum(getContext(), model, item.getSerialNumber(), value[0]);
+                            adapter.notifyDataSetChanged();
+                        } catch (Exception e) {
+                            Utils.showToast(getContext(), "输入数量不合法！");
+                        }
                     }
-                }, "编辑产品数量").addView(new String[]{"产品数量"}, 0, "").show();
+                }, "编辑产品数量").addView(new String[]{"产品数量"}, 0, item.getNowqty()).show();
             }
         };
         private View.OnClickListener rightListener = new View.OnClickListener() {
@@ -170,7 +188,7 @@ public class EditProductFragment extends BaseFragment {
             ProductList.ProductItem item = getItem(position);
             holder.titleView.setText(item.getSerialNumber());
             holder.textView.setText(item.getMaterialName());
-            holder.dateView.setText(ViewTool.makeQtyAndUnit(getContext(), item.getNowqty(), item.getQty(), item.getSaleUnit()));
+            holder.dateView.setText(ViewTool.makeQtyAndUnit(getContext(), item.getNowqty(), item.getQty(), item.getUom()));
             holder.leftBtn.setTag(item);
             holder.rightBtn.setTag(item);
         }

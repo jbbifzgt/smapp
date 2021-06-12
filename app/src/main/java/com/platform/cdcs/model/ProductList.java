@@ -47,6 +47,7 @@ public class ProductList extends MockObj {
         private boolean choose;
         //当前数量
         private String nowqty;
+        private int type;
 
         public static List<ProductItem> parseList(String array) throws JSONException {
             List<ProductItem> list = new ArrayList<>();
@@ -54,7 +55,7 @@ public class ProductList extends MockObj {
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject obj = jsonArray.getJSONObject(i);
                 ProductItem item = new ProductItem();
-                item.setItemName(obj.getString("name"));
+                item.setMaterialName(obj.has("name") ? obj.getString("name") : "");
                 item.setSerialNumber(obj.getString("code"));
                 item.setMaterialNumber(obj.getString("number"));
                 item.setSubBU(obj.getString("subBU"));
@@ -80,6 +81,9 @@ public class ProductList extends MockObj {
         }
 
         public String getNowqty() {
+            if (TextUtils.isEmpty(nowqty)) {
+                nowqty = "0";
+            }
             return nowqty;
         }
 
@@ -202,7 +206,7 @@ public class ProductList extends MockObj {
 
         public JSONObject toJSON() throws JSONException {
             JSONObject object = new JSONObject();
-            object.put("name", itemName);
+            object.put("name", materialName);
             //序列号
             object.put("code", serialNumber);
             //批号
@@ -210,7 +214,20 @@ public class ProductList extends MockObj {
             object.put("subBU", subBU);
             object.put("unit", uom);
             object.put("num", qty);
-            object.put("nowqty", 0);
+            object.put("nowqty", nowqty);
+            return object;
+        }
+
+        public JSONObject toJSON1() throws JSONException {
+            JSONObject object = new JSONObject();
+            object.put("name", materialName);
+            //序列号
+            object.put("serialNumber", serialNumber);
+            //批号
+            object.put("productNum", materialNumber);
+            object.put("unit", uom);
+            object.put("num", qty);
+            object.put("nowqty", nowqty);
             return object;
         }
 
@@ -225,5 +242,10 @@ public class ProductList extends MockObj {
             ProductItem other = (ProductItem) o;
             return other.getSerialNumber().equals(getSerialNumber());
         }
+
+        public int getType() {
+            return type;
+        }
+
     }
 }

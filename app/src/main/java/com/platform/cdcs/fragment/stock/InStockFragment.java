@@ -49,6 +49,11 @@ public class InStockFragment extends BaseFragment {
             }
         });
         listView.setPullRefreshEnable(false);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            }
+        });
         listView.setAdapter(adapter);
         requestList();
     }

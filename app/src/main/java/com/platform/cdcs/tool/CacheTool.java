@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.platform.cdcs.MyApp;
+import com.platform.cdcs.model.InvoiceList;
 import com.platform.cdcs.model.ProductList;
 import com.trueway.app.uilib.model.ChooseItem;
 
@@ -21,6 +23,7 @@ public class CacheTool {
     private static List<ProductList.ProductItem> inputList = null;
     private static List<ProductList.ProductItem> outputList = null;
 
+    private static List<InvoiceList.Invoice> invoiceList = null;
 
     public static List<ProductList.ProductItem> getInputList(Context context) {
         if (inputList == null) {
@@ -43,23 +46,10 @@ public class CacheTool {
         return cacheSP.getString("input", "[]");
     }
 
-//    public static void append(Context context, ProductList.ProductItem item) {
-//        String data = getInputCache(context);
-//        JSONArray array = null;
-//        try {
-//            array = new JSONArray(data);
-//            array.put(item.toJSON());
-//            SharedPreferences cacheSP = context
-//                    .getSharedPreferences(Constant.OA_PREFERENCE,
-//                            Context.MODE_PRIVATE);
-//            cacheSP.edit().putString("input", array.toString()).commit();
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//        }
-//
-//    }
-
     public static void clearInputCache(Context context) {
+        if(context==null){
+            context= MyApp.getInstance().getApplication();
+        }
         SharedPreferences cacheSP = context
                 .getSharedPreferences(Constant.OA_PREFERENCE,
                         Context.MODE_PRIVATE);
@@ -78,6 +68,9 @@ public class CacheTool {
     }
 
     public static void clearOutputCache(Context context) {
+        if(context==null){
+            context= MyApp.getInstance().getApplication();
+        }
         SharedPreferences cacheSP = context
                 .getSharedPreferences(Constant.OA_PREFERENCE,
                         Context.MODE_PRIVATE);
@@ -166,7 +159,7 @@ public class CacheTool {
         }
         for (ProductList.ProductItem item : items) {
             if (serialNumber.equals(item.getSerialNumber())) {
-                item.setQty(num);
+                item.setNowqty(num);
                 break;
             }
         }
@@ -185,5 +178,62 @@ public class CacheTool {
                 break;
             }
         }
+    }
+
+    private static void initInvoice(Context context) {
+        invoiceList = new ArrayList<>();
+        try {
+            invoiceList.addAll(InvoiceList.parseList(getOutputCache(context)));
+        } catch (Exception e) {
+        }
+    }
+
+    public static int invoiceCount(Context context) {
+        if (invoiceList == null) {
+            initInvoice(context);
+        }
+        return invoiceList.size();
+    }
+
+    public static void appendInvoice(Context context, InvoiceList.Invoice item) {
+        if (invoiceList == null) {
+            initInvoice(context);
+        }
+        if (!invoiceList.contains(item)) {
+            invoiceList.add(item);
+        }
+    }
+
+    public static void saveInvoiceCache(Context context) {
+        SharedPreferences cacheSP = context
+                .getSharedPreferences(Constant.OA_PREFERENCE,
+                        Context.MODE_PRIVATE);
+        cacheSP.edit().putString("invoice", InvoiceList.ListToString(invoiceList)).commit();
+    }
+
+    public static List<InvoiceList.Invoice> getInvoiceList(Context context) {
+        if (invoiceList == null) {
+            initInvoice(context);
+        }
+        return invoiceList;
+    }
+
+    public static void clearInvoice(Context context) {
+        if(context==null){
+            context= MyApp.getInstance().getApplication();
+        }
+        SharedPreferences cacheSP = context
+                .getSharedPreferences(Constant.OA_PREFERENCE,
+                        Context.MODE_PRIVATE);
+        cacheSP.edit().remove("invoice").commit();
+        if (invoiceList != null) {
+            invoiceList.clear();
+        }
+    }
+
+    public static void clearAll(Context context) {
+        CacheTool.clearInputCache(context);
+        CacheTool.clearOutputCache(context);
+        CacheTool.clearInvoice(context);
     }
 }

@@ -42,6 +42,7 @@ public class MainTabActivity extends BaseActivity {
 
     @Override
     protected void initView() {
+        removeHomeReceiver();
         getToolBar().setVisibility(View.GONE);
         viewPager = (ViewPager) findViewById(R.id.viewPager);
         viewPager.setOffscreenPageLimit(3);

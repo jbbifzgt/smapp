@@ -2,25 +2,36 @@ package com.platform.cdcs.fragment.account;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.SparseArray;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
+import android.widget.AdapterView;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.platform.cdcs.R;
+import com.platform.cdcs.adapter.LetterAcountAdapter;
 import com.platform.cdcs.fragment.custom.AddRegNumberFragment;
 import com.platform.cdcs.model.BaseObjResponse;
 import com.platform.cdcs.model.CustomerItem;
 import com.platform.cdcs.model.DistCustomerList;
+import com.platform.cdcs.model.LetterGroup;
 import com.platform.cdcs.model.RefershEvent;
 import com.platform.cdcs.tool.Constant;
 import com.platform.cdcs.tool.FragmentUtil;
+import com.platform.cdcs.widget.PullToRefreshRecycleView;
+import com.platform.cdcs.widget.SectionedRecyclerViewAdapter;
 import com.sherchen.slidetoggleheader.views.ObservableXListView;
 import com.trueway.app.uilib.adapter.EnhancedAdapter;
 import com.trueway.app.uilib.fragment.BaseFragment;
@@ -32,6 +43,7 @@ import com.zhy.http.okhttp.callback.StringCallback;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import de.greenrobot.event.EventBus;
@@ -43,15 +55,15 @@ import okhttp3.Call;
  */
 public class AccountListFragment extends BaseFragment {
 
-    private ObservableXListView slideListView;
+    private PullToRefreshRecycleView slideListView;
     private LetterBar letterBar;
-    private ItemAdapter adapter;
+    private LetterAcountAdapter adapter;
     private String custName = "";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        adapter = new ItemAdapter(getContext());
+        adapter = new LetterAcountAdapter(getContext());
         EventBus.getDefault().register(this);
     }
 
@@ -74,7 +86,7 @@ public class AccountListFragment extends BaseFragment {
         setHasOptionsMenu(true);
         setTitle("我的客户");
         view.findViewById(R.id.search_layout).setVisibility(View.VISIBLE);
-        initSearch(view.findViewById(R.id.search), "输入产品型号查询", new SearchListener() {
+        initSearch(view.findViewById(R.id.search), "输入名称或代码搜索", new SearchListener() {
             @Override
             public void search(String s) {
                 adapter.clear();
@@ -83,18 +95,26 @@ public class AccountListFragment extends BaseFragment {
                 requestList();
             }
         }, view.findViewById(R.id.cancel));
-
+        final GridLayoutManager manager = new GridLayoutManager(getActivity(),1);
+        adapter.setLayoutManager(manager);
         letterBar = (LetterBar) view.findViewById(R.id.letter_bar);
         letterBar.setOnLetterSelectListener(new LetterBar.OnLetterSelectListener() {
             @Override
             public void onLetterSelect(int position, String letter, boolean confirmed) {
                 Integer sectionPosition = adapter.getSectionPosition(position);
                 if (sectionPosition != null)
-                    slideListView.setSelection(sectionPosition);
+                    manager.scrollToPositionWithOffset(sectionPosition, 0);
             }
         });
-        slideListView = (ObservableXListView) view.findViewById(android.R.id.list);
-        slideListView.setPullRefreshEnable(false);
+        adapter.setOnItemClickLitener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                DistCustomerList.Customer item = (DistCustomerList.Customer) adapter.get(i).getSubList().get((int) l);
+                //TODO
+            }
+        });
+        slideListView = (PullToRefreshRecycleView) view.findViewById(android.R.id.list);
+        slideListView.setLayoutManager(manager);
         slideListView.setAdapter(adapter);
         requestList();
     }
@@ -131,12 +151,11 @@ public class AccountListFragment extends BaseFragment {
             @Override
             public void onResponse(String s, int i) {
                 dismissLoadImg();
-                //TODO
                 Type type = new TypeToken<BaseObjResponse<DistCustomerList>>() {
                 }.getType();
                 BaseObjResponse<DistCustomerList> response = new Gson().fromJson(s, type);
                 if ("1".equals(response.getResult().getCode())) {
-                    adapter.addAll(response.getResult().getDistCustomerList());
+                    adapter.setDataModel(response.getResult().getLetterModel());
                     adapter.notifyDataSetChanged();
                 } else {
                     Utils.showToast(getContext(), response.getResult().getMsg());
@@ -148,57 +167,8 @@ public class AccountListFragment extends BaseFragment {
     @Subscribe
     public void onEventMainThread(RefershEvent event) {
         if (event.mclass == getClass()) {
-            adapter.clear();
-            adapter.notifyDataSetChanged();
             requestList();
         }
     }
 
-    private class ItemAdapter extends EnhancedAdapter<DistCustomerList.Customer> {
-
-        private int mLineNumber = 0;
-        private SparseArray<Integer> mKeyPositionMap = new SparseArray<>();
-
-        public ItemAdapter(Context context) {
-            super(context);
-        }
-
-        private void init() {
-            calculateSectionPosition();
-        }
-
-        public Integer getSectionPosition(int asciiPosition) {
-            return mKeyPositionMap.get(asciiPosition);
-        }
-
-        private void calculateSectionPosition() {
-            int pos = 0;
-            int i = 0;
-//            for (PatientModel.PatientGroup group : dataModel.getGroupList()) {
-//                mKeyPositionMap.put(group.getTitle().charAt(0) - 'A' + 1, i);
-//                i += group.getPatientList().size();
-//                i++;
-//            }
-            mLineNumber = pos;
-        }
-
-        @Override
-        protected void bindView(View paramView, Context paramContext, int position) {
-            TextView textView = (TextView) paramView;
-            textView.setBackgroundResource(R.drawable.shape_corner_center);
-            textView.setText(getItem(position).getCustName());
-        }
-
-        @Override
-        protected View newView(Context context, int position, ViewGroup viewgroup) {
-            TextView textView = new TextView(context);
-            AbsListView.LayoutParams lp = new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, AbsListView.LayoutParams.WRAP_CONTENT);
-            textView.setTextSize(14);
-            int padding = Utils.convertDIP2PX(getContext(), 12);
-            textView.setPadding(padding, padding, padding, padding);
-            textView.setTextColor(getResources().getColor(R.color.text_black));
-            textView.setLayoutParams(lp);
-            return textView;
-        }
-    }
 }

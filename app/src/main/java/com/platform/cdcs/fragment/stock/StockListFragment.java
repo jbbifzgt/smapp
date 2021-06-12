@@ -12,16 +12,13 @@ import android.widget.TextView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.platform.cdcs.R;
-import com.platform.cdcs.fragment.custom.ProSearchFragment;
 import com.platform.cdcs.model.BaseObjResponse;
-import com.platform.cdcs.model.CustomerItem;
 import com.platform.cdcs.model.HouseItem;
 import com.platform.cdcs.tool.Constant;
 import com.platform.cdcs.tool.FragmentUtil;
 import com.sherchen.slidetoggleheader.views.ObservableXListView;
 import com.trueway.app.uilib.adapter.EnhancedAdapter;
 import com.trueway.app.uilib.fragment.BaseFragment;
-import com.trueway.app.uilib.model.ChooseItem;
 import com.trueway.app.uilib.tool.Utils;
 import com.zhy.http.okhttp.callback.StringCallback;
 

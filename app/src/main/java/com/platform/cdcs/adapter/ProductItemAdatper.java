@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -20,18 +21,15 @@ import com.trueway.app.uilib.imgpick.ImageSet;
  */
 public class ProductItemAdatper extends EnhancedAdapter<ProductList.ProductItem> {
     private int model;
-    private View.OnClickListener itemListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            ProductList.ProductItem item = getItem((int) view.getTag(R.mipmap.ic_launcher));
-            Bundle bundle = new Bundle();
-            bundle.putSerializable("model", item);
-            FragmentUtil.navigateToInNewActivity(getContext(), ProductDetailFragment.class, bundle);
-        }
-    };
+
+    private View.OnClickListener itemListener;
 
     public ProductItemAdatper(Context context) {
         super(context);
+    }
+
+    public void setItemListener(View.OnClickListener itemListener) {
+        this.itemListener = itemListener;
     }
 
     public void setModel(int model) {
@@ -45,7 +43,7 @@ public class ProductItemAdatper extends EnhancedAdapter<ProductList.ProductItem>
         holder.titleView.setText(item.getMaterialNumber());
         holder.textView.setText(item.getMaterialName());
         holder.dateView.setText(String.format("%s %s", item.getProductNum(), item.getDefaultUnit()));
-        paramView.setTag(R.mipmap.ic_launcher, position);
+        paramView.setTag(R.mipmap.ic_launcher, item);
         if (model == 1) {
             holder.checkView.setSelected(item.isChoose());
         }

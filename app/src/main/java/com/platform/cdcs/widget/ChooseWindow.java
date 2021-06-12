@@ -110,7 +110,7 @@ public class ChooseWindow {
             }
         }
         if (!TextUtils.isEmpty(choose)) {
-            choose.substring(0, choose.length() - 1);
+            choose= choose.substring(0, choose.length() - 1);
         }
         return choose;
     }
@@ -129,8 +129,8 @@ public class ChooseWindow {
         protected void bindView(View paramView, Context paramContext, int position) {
             ChooseItem item = getItem(position);
             ViewHolder holder = (ViewHolder) paramView.getTag();
-            holder.titleView.setText(item.getTitle());
-            holder.textView.setText(item.getText());
+            holder.titleView.setText(item.getTime());
+            holder.textView.setText(item.getTitle());
             holder.checkView.setSelected(item.isCheck());
         }
 

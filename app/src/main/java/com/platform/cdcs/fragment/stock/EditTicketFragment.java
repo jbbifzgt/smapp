@@ -9,9 +9,17 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.platform.cdcs.MyApp;
 import com.platform.cdcs.R;
+import com.platform.cdcs.fragment.choose.AccountChooseFragment;
 import com.platform.cdcs.fragment.operation.OperationFragment;
 import com.platform.cdcs.fragment.choose.PackageChooseFragment;
+import com.platform.cdcs.model.BaseObjResponse;
+import com.platform.cdcs.model.ProductList;
+import com.platform.cdcs.model.RefershEvent;
+import com.platform.cdcs.model.XtbmItem;
 import com.platform.cdcs.tool.CacheTool;
 import com.platform.cdcs.tool.Constant;
 import com.platform.cdcs.tool.FragmentUtil;
@@ -22,6 +30,10 @@ import com.trueway.app.uilib.widget.TimeDialogBuilder;
 import com.trueway.app.uilib.widget.TwDialogBuilder;
 import com.zhy.http.okhttp.callback.StringCallback;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,7 +46,8 @@ import okhttp3.Call;
  */
 public class EditTicketFragment extends BaseFragment {
 
-    private EditText timeET, typeET;
+    private EditText timeET, typeET, addressET, nameET,bakET;
+    private String[] typeArray;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -61,22 +74,27 @@ public class EditTicketFragment extends BaseFragment {
 
         LayoutInflater inflater = LayoutInflater.from(getContext());
         LinearLayout rootView1 = (LinearLayout) view.findViewById(R.id.button1);
-        EditText nameET = ViewTool.createEditItem(inflater, "出库单号", rootView1, false, false);
+        nameET = ViewTool.createEditItem(inflater, "出库单号", rootView1, false, false);
         nameET.setHint("请填写出库单号");
-        EditText addressET = ViewTool.createEditItem(inflater, "收货方", rootView1, false, true);
+        nameET.setText(Constant.makeID(MyApp.getInstance().getAccount().getOrgId()));
+        nameET.setEnabled(false);
+        addressET = ViewTool.createEditItem(inflater, "收货方", rootView1, false, true);
         addressET.setHint("请选择客户");
         addressET.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                Bundle bundle = new Bundle();
+                bundle.putString("class", EditTicketFragment.this.getClass().getName());
+                bundle.putInt("model", 0);
+                FragmentUtil.navigateToInNewActivity(getActivity(), AccountChooseFragment.class, bundle);
             }
         });
         typeET = ViewTool.createEditItem(inflater, "出库类型", rootView1, false, true);
-        typeET.setHint("请选择出货类型");
+        typeET.setHint("请选择出库类型");
         typeET.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                requestType();
+                showType();
             }
         });
 
@@ -97,7 +115,7 @@ public class EditTicketFragment extends BaseFragment {
                 }).create().show();
             }
         });
-        EditText bakET = ViewTool.createEditItemNoLine(inflater, "备注", rootView1, false, false);
+         bakET = ViewTool.createEditItemNoLine(inflater, "备注", rootView1, false, false);
         bakET.setHint("请填写");
         LinearLayout rootView2 = (LinearLayout) view.findViewById(R.id.button2);
         EditText productET = ViewTool.createEditItem(inflater, "出库产品", rootView2, false, true);
@@ -146,7 +164,51 @@ public class EditTicketFragment extends BaseFragment {
     }
 
     private void finishClick() {
-        FragmentUtil.navigateToInNewActivity(getActivity(), FinishFragment.class, null);
+
+        if (CacheTool.getOutputCount(getContext()) == 0) {
+            Utils.showToast(getContext(), "请先添加产品");
+            return;
+        }
+        showLoadImg();
+        try {
+            JSONObject postObj = new JSONObject();
+            postObj.put("docNo", nameET.getText().toString());
+            postObj.put("docDate", timeET.getText().toString());
+            postObj.put("distName", addressET.getText().toString());
+            postObj.put("distCode", (String) addressET.getTag());
+//            if (!TextUtils.isEmpty(stockET.getText().toString())) {
+//                postObj.put("whName", stockET.getText().toString());
+//                postObj.put("whCode", (String) stockET.getTag());
+//            } else {
+//                postObj.put("whName", "");
+//                postObj.put("whCode", "");
+//            }
+            postObj.put("docType", typeET.getText().toString());
+            postObj.put("sysType", "2");
+            JSONArray array = new JSONArray();
+            for (ProductList.ProductItem item : CacheTool.getInputList(getContext())) {
+                array.put(item.toJSON1());
+            }
+            postObj.put("productList", array);
+            getHttpClient().post().url(Constant.OUT_HOUSE).params(Constant.makeParam(postObj.toString())).build().execute(new StringCallback() {
+                @Override
+                public void onError(Call call, Exception e, int i) {
+                    dismissLoadImg();
+                    Utils.showToast(getContext(), R.string.server_error);
+                }
+
+                @Override
+                public void onResponse(String s, int i) {
+                    dismissLoadImg();
+
+                    Bundle bundle = new Bundle();
+                    bundle.putInt("model", 1);
+                    FragmentUtil.navigateToInNewActivity(getActivity(), FinishFragment.class, bundle);
+                }
+            });
+        } catch (Exception e) {
+            Utils.showToast(getContext(), "数据错误！");
+        }
     }
 
 
@@ -156,7 +218,7 @@ public class EditTicketFragment extends BaseFragment {
     private void requestType() {
         showLoadImg();
         Map<String, String> param = new HashMap<>();
-        param.put("docType", "1");
+        param.put("type", "outType");
         getHttpClient().post().url(Constant.DIC_XTBM).params(Constant.makeParam(param)).build().execute(new StringCallback() {
             @Override
             public void onError(Call call, Exception e, int i) {
@@ -167,18 +229,43 @@ public class EditTicketFragment extends BaseFragment {
             @Override
             public void onResponse(String s, int i) {
                 dismissLoadImg();
-                new TwDialogBuilder(getContext()).setItems(new String[]{}, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        //TODO
-                        typeET.setText("");
+                try {
+                    Type mtype = new TypeToken<BaseObjResponse<XtbmItem.XtbmList>>() {
+                    }.getType();
+                    BaseObjResponse<XtbmItem.XtbmList> response = new Gson().fromJson(s, mtype);
+                    if ("1".equals(response.getResult().getCode())) {
+                        typeArray = response.getResult().toArray();
+                        showType();
+                    } else {
+                        Utils.showToast(getContext(), response.getResult().getMsg());
                     }
-                }, "");
+                } catch (Exception e) {
+                    Utils.showToast(getContext(), "解析数据失败");
+                }
             }
         });
     }
 
     @Subscribe
-    public void onEventMainThread() {
+    public void onEventMainThread(RefershEvent event) {
+        if (event.mclass == this.getClass()) {
+            if (event.oclass == AccountChooseFragment.class) {
+                addressET.setText(event.bundle.getString("name"));
+            }
+        }
+    }
+
+
+    private void showType() {
+        if (typeArray == null) {
+            requestType();
+        } else {
+            new TwDialogBuilder(getContext()).setItems(typeArray, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    typeET.setText(typeArray[i]);
+                }
+            }, "").create().show();
+        }
     }
 }

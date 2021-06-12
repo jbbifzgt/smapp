@@ -45,6 +45,7 @@ public class MsgSettingFragment extends BaseFragment {
         arriveMsgItem = new ChooseItem();
         arriveMsgItem.setTitle("到货提醒");
         arriveMsgItem.setType(1);
+        adapter.addItem(arriveMsgItem);
         inoutMsgItem = new ChooseItem();
         inoutMsgItem.setTitle("出入库上报");
         inoutMsgItem.setType(1);

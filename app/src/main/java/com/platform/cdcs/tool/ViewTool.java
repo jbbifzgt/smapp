@@ -169,7 +169,7 @@ public class ViewTool {
 
     public static SpannableString makeQtyAndUnit(Context context, String nowqty, String qty, String unit) {
         SpannableString ss = new SpannableString(String.format("%s /%s %s", nowqty, qty, unit));
-        ss.setSpan(new ForegroundColorSpan(context.getResources().getColor(R.color.title_bg)), 0, nowqty.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        ss.setSpan(new ForegroundColorSpan(context.getResources().getColor(R.color.color_green_normal)), 0, nowqty.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         return ss;
     }
 

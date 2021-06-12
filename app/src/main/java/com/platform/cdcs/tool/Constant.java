@@ -5,6 +5,8 @@ import com.trueway.app.uilib.tool.Md5;
 
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,6 +34,10 @@ public class Constant {
     public static final String PRODUCT_LST = URL + "getProductLst";
     public static final String SUBBU_LST = URL + "getSubBULst";
     public static final String SCAN_PRODUCT = URL + "getScanProduct";
+    public static final String PRODUCT_COUNT_LIST = URL + "getProductCountList";
+    public static final String PRODUCT_COUNTINFO_LIST = URL + "getProductCountInfoList";
+    public static final String WARE_HOUSE = URL + "wareHouse";
+    public static final String OUT_HOUSE = URL + "outHouse";
 
     //发票
     public static final String INVOICE_LST = URL + "getInvoiceLst";
@@ -83,7 +89,12 @@ public class Constant {
 
     public static final String DIC_XTBM = URL + "getXtbm";
 
+    //经销商列表
+    public static final String DIST_LST = URL + "getDistLst";
+
     public static final String PROVINCE_CITY_LIST = URL + "getProvinceCityList";
+    //到货通知
+    public static final String DOCUMENT_INFO_LST = URL + "getDocumentInfoLst";
 
     public static Map<String, String> makeLoginParam(String data) {
         Map<String, String> params = new HashMap<>();
@@ -105,5 +116,14 @@ public class Constant {
     public static Map<String, String> makeParam(Map<String, String> map) {
         map.put("sysType", "2");
         return makeParam(new JSONObject(map).toString());
+    }
+
+    public static String makeID(String userName) {
+        StringBuffer sb = new StringBuffer(userName.replace("MDMUD", ""));
+        sb.append("11");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
+        sb.append(sdf.format(new Date()));
+        sb.append((int) (Math.random() * 10) + "" + (int) (Math.random() * 10));
+        return sb.toString();
     }
 }

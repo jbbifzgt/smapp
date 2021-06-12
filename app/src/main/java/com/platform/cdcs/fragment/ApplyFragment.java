@@ -90,7 +90,7 @@ public class ApplyFragment extends BaseFragment {
     private void request() {
         showLoadImg();
         Map<String, String> param = new HashMap<>();
-        param.put("distApplyName", "");
+//        param.put("distApplyName", "");
         getHttpClient().post().url(Constant.OTHER_REPORT_LST).params(Constant.makeParam(param)).build().execute(new StringCallback() {
             @Override
             public void onError(Call call, Exception e, int i) {

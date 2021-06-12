@@ -88,6 +88,7 @@ public class AddStockFragment extends BaseFragment {
             Utils.showToast(getContext(), "库位名称不能为空");
             return;
         }
+        showLoadImg();
         Map<String, String> param = new HashMap<>();
         param.put("updateType", "0");
         param.put("whName", name);

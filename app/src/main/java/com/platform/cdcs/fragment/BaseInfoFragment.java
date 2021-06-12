@@ -1,6 +1,8 @@
 package com.platform.cdcs.fragment;
 
+import android.content.DialogInterface;
 import android.text.InputType;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -13,16 +15,19 @@ import com.google.gson.reflect.TypeToken;
 import com.platform.cdcs.R;
 import com.platform.cdcs.model.BaseObjResponse;
 import com.platform.cdcs.model.MockObj;
+import com.platform.cdcs.model.ProvinceCity;
 import com.platform.cdcs.tool.Constant;
 import com.platform.cdcs.tool.ViewTool;
 import com.trueway.app.uilib.fragment.BaseFragment;
 import com.trueway.app.uilib.tool.Utils;
+import com.trueway.app.uilib.widget.TwDialogBuilder;
 import com.zhy.http.okhttp.callback.StringCallback;
 
 import org.json.JSONObject;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import okhttp3.Call;
@@ -34,6 +39,8 @@ public class BaseInfoFragment extends BaseFragment {
 
     private EditText chinaET, engET, proET, cityET, addressET, postET, phoneET, bakET, taxET;
     private ImageView rollBack, cxImg, manageImg, useAccount, showCode, showName, showNumber, proName, showChinaName, showlineName;
+    private Map<String, List<String>> proMap;
+    private List<String> proList;
 
     @Override
     public void initView(View view) {
@@ -65,10 +72,10 @@ public class BaseInfoFragment extends BaseFragment {
         cityET.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//TODO
+                showCityList();
             }
         });
-        proET.setHint("请选择城市");
+        cityET.setHint("请选择城市");
 
         addressET = ViewTool.createEditItem(inflater, "地址", root1, false, false);
         addressET.setHint("请输入地址");
@@ -213,7 +220,6 @@ public class BaseInfoFragment extends BaseFragment {
         return R.layout.baseinfo;
     }
 
-
     private void requestDetail() {
         showLoadImg();
         getHttpClient().post().url(Constant.DIST_MDMUD_INFO).params(Constant.makeParam(new HashMap<String, String>())).build().execute(new StringCallback() {
@@ -303,12 +309,13 @@ public class BaseInfoFragment extends BaseFragment {
         });
     }
 
-    /**
-     * TODO 省
-     */
     private void requestPro() {
+        if (proList != null) {
+            showProList();
+            return;
+        }
         showLoadImg();
-        getHttpClient().post().url(Constant.PROVINCE_CITY_LIST).params(new HashMap<String, String>()).build().execute(new StringCallback() {
+        getHttpClient().post().url(Constant.PROVINCE_CITY_LIST).params(Constant.makeParam(new HashMap<String, String>())).build().execute(new StringCallback() {
             @Override
             public void onError(Call call, Exception e, int i) {
                 dismissLoadImg();
@@ -318,7 +325,45 @@ public class BaseInfoFragment extends BaseFragment {
             @Override
             public void onResponse(String s, int i) {
                 dismissLoadImg();
+                Type type = new TypeToken<BaseObjResponse<ProvinceCity.ProvinceCityList>>() {
+                }.getType();
+                BaseObjResponse<ProvinceCity.ProvinceCityList> response = new Gson().fromJson(s, type);
+                if ("1".equals(response.getResult().getCode())) {
+                    proMap = response.getResult().proMap();
+                    proList = response.getResult().getProList();
+                    showProList();
+                } else {
+                    Utils.showToast(getContext(), response.getResult().getMsg());
+                }
             }
         });
+    }
+
+    private void showProList() {
+        new TwDialogBuilder(getContext()).setItems(proList.toArray(new String[proList.size()]), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                String pro = proList.get(i);
+                proET.setText(pro);
+                cityET.setText("");
+            }
+        }, "").create().show();
+    }
+
+    private void showCityList() {
+        final String pro = proET.getText().toString();
+        if (TextUtils.isEmpty(pro)) {
+            Utils.showToast(getContext(), "请先选择省份");
+            return;
+        }
+        if (proMap.containsKey(pro) && proMap.get(pro).size() > 0) {
+            new TwDialogBuilder(getContext()).setItems(proMap.get(pro).toArray(new String[proMap.get(pro).size()]), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    String city = proMap.get(pro).get(i);
+                    cityET.setText(city);
+                }
+            }, "").create().show();
+        }
     }
 }

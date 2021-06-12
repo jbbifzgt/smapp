@@ -134,7 +134,7 @@ public class AddProductFragment extends BaseFragment {
         });
         LinearLayout rootView3 = (LinearLayout) view.findViewById(R.id.button3);
         EditText numET = ViewTool.createEditItemNoLine(inflater, model == 0 ? "入库数量" : "出库数量", rootView3, true, false);
-        numET.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        numET.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
 
         view.findViewById(R.id.button4).setVisibility(View.GONE);
         view.findViewById(R.id.button5).setVisibility(View.GONE);

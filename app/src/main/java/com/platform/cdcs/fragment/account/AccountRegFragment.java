@@ -2,6 +2,7 @@ package com.platform.cdcs.fragment.account;
 
 import android.os.Bundle;
 import android.text.InputType;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -69,14 +70,15 @@ public class AccountRegFragment extends BaseFragment {
             @Override
             public void onClick(View view) {
                 Bundle bundle = new Bundle();
-                bundle.putString("class", String.valueOf(AccountRegFragment.this.getClass()));
+                bundle.putInt("model", 1);
+                bundle.putString("class", AccountRegFragment.this.getClass().getName());
                 FragmentUtil.navigateToInNewActivity(getActivity(), AccountChooseFragment.class, bundle);
             }
         });
         nameET.setHint("请选择");
         codeET = ViewTool.createEditItem(inflater, "标准代码", rootView, true, false);
         codeET.setHint("请输入标准代码");
-        codeET.setEnabled(false);
+//        codeET.setEnabled(false);
         numberET = ViewTool.createEditItem(inflater, "自定义客户代码", rootView, false, false);
         numberET.setHint("请输入自定义客户代码");
 
@@ -107,8 +109,15 @@ public class AccountRegFragment extends BaseFragment {
 
 
     private void post() {
+        if (TextUtils.isEmpty(accountNameET.getText().toString())) {
+            Utils.showToast(getContext(), "标准名称不能为空！");
+            return;
+        }
+        if (TextUtils.isEmpty(numberET.getText().toString())) {
+            Utils.showToast(getContext(), "标准代码不能为空！");
+            return;
+        }
         showLoadImg();
-        //TODO
         Map<String, String> param = new HashMap<>();
         param.put("custCode", standardCode);
         param.put("custName", standardName);
@@ -131,6 +140,10 @@ public class AccountRegFragment extends BaseFragment {
                 BaseObjResponse<MockObj> response = new Gson().fromJson(s, type);
                 if ("1".equals(response.getResult().getCode())) {
                     Utils.showToast(getContext(), "添加成功！");
+                    RefershEvent event=new RefershEvent();
+                    event.mclass=AccountListFragment.class;
+                    EventBus.getDefault().post(event);
+                    getActivity().finish();
                 } else {
                     Utils.showToast(getContext(), response.getResult().getMsg());
                 }

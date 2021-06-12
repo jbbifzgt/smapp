@@ -450,6 +450,7 @@ public class StockScanActivity extends BaseActivity implements QRCodeView.Delega
             item.setSubBU(obj.getString("subBU"));
             item.setUom(obj.getString("saleUnit"));
             item.setQty(obj.getString("qty"));
+            item.setNowqty(obj.getString("qty"));
 //            item.setQty("1");
             item = CacheTool.append(getActivity(), item, model);
             if (i == array.length() - 1) {

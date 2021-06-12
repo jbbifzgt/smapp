@@ -94,6 +94,7 @@ public class ProductFragment extends BaseFragment {
         typeView.setText(ViewTool.makeArrorDown("全部产品线", "▼"));
         TextView pieView = (TextView) view.findViewById(R.id.button1);
         pieView.setCompoundDrawablesWithIntrinsicBounds(R.mipmap.icon_pie, 0, 0, 0);
+        pieView.setGravity(Gravity.CENTER);
         pieView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -101,6 +102,16 @@ public class ProductFragment extends BaseFragment {
             }
         });
         listView = (ObservableXListView) view.findViewById(android.R.id.list);
+        adapter.setItemListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ProductList.ProductItem item = (ProductList.ProductItem) view.getTag(R.mipmap.ic_launcher);
+                Bundle bundle = new Bundle();
+                bundle.putString("whName", currentItem.getWhName());
+                bundle.putSerializable("model",item);
+                FragmentUtil.navigateToInNewActivity(getActivity(), ProductDetailFragment.class, bundle);
+            }
+        });
         listView.setPullRefreshEnable(true);
         listView.setXListViewListener(new XListView.IXListViewListener() {
             @Override
@@ -220,13 +231,14 @@ public class ProductFragment extends BaseFragment {
             showSelfLoadImg();
         }
         Map<String, String> param = new HashMap<>();
-        param.put("distCode", MyApp.getInstance().getAccount().getOrgId());
-        param.put("whCode", currentItem.getWhCode());
+//        param.put("distCode", MyApp.getInstance().getAccount().getOrgId());
+//        param.put("whCode", currentItem.getWhCode());
+        param.put("reqType", "");
         param.put("whName", currentItem.getWhName());
-        param.put("subBU", subBU);
+        param.put("subBUCode", subBU);
         param.put("pageIndex", String.valueOf(pageIndex));
         param.put("pageSize", String.valueOf(Constant.PAGE_SIZE));
-        getHttpClient().post().url(Constant.DIST_PRODUCT_LST).params(Constant.makeParam(param)).build().execute(new StringCallback() {
+        getHttpClient().post().url(Constant.PRODUCT_COUNT_LIST).params(Constant.makeParam(param)).build().execute(new StringCallback() {
             @Override
             public void onError(Call call, Exception e, int i) {
                 dismissLoadImg();

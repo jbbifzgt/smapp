@@ -85,7 +85,6 @@ public class AddRegNumberFragment extends BaseFragment {
         name1ET.setHint("请输入自定义产品名称");
 
         EditText unitET = ViewTool.createEditItemNoLine(inflater, "默认单位", root1, true, false);
-        unitET.setInputType(InputType.TYPE_NULL);
         unitET.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -100,7 +99,7 @@ public class AddRegNumberFragment extends BaseFragment {
             @Override
             public void onClick(View view) {
                 Bundle bundle = new Bundle();
-                bundle.putString("class", String.valueOf(AddRegNumberFragment.this.getClass()));
+                bundle.putString("class", AddRegNumberFragment.this.getClass().getName());
                 FragmentUtil.navigateToInNewActivity(getActivity(), AccountChooseFragment.class, bundle);
             }
         });
@@ -253,7 +252,7 @@ public class AddRegNumberFragment extends BaseFragment {
     @Subscribe
     public void onEventMainThread(RefershEvent event) {
         if (event.mclass == getClass()) {
-            if(event.oclass==AccountChooseFragment.class){
+            if (event.oclass == AccountChooseFragment.class) {
                 String code = event.bundle.getString("code");
                 String name = event.bundle.getString("name");
                 clientNameET.setText(name);

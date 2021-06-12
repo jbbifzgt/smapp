@@ -9,9 +9,13 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.platform.cdcs.MyApp;
 import com.platform.cdcs.R;
 import com.platform.cdcs.adapter.ProductItemAdatper;
 import com.platform.cdcs.fragment.account.AccountRegFragment;
+import com.platform.cdcs.model.BaseObjResponse;
 import com.platform.cdcs.model.ProductList;
 import com.platform.cdcs.model.RefershEvent;
 import com.platform.cdcs.tool.Constant;
@@ -22,6 +26,7 @@ import com.trueway.app.uilib.fragment.BaseFragment;
 import com.trueway.app.uilib.tool.Utils;
 import com.zhy.http.okhttp.callback.StringCallback;
 
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,6 +43,7 @@ public class ProductTypeFragment extends BaseFragment {
     private int model;
     private TextView allBtn;
     private String mClass;
+    private int pageIndex = 1;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -52,7 +58,11 @@ public class ProductTypeFragment extends BaseFragment {
     public void initView(View view) {
         setHasOptionsMenu(true);
         adapter = new ProductItemAdatper(getContext());
-        setTitle("选择产品型号");
+        if (model == 0) {
+            setTitle("选择产品型号");
+        } else {
+            setTitle("选择产品");
+        }
         getToolBar().setNavigationIcon(R.mipmap.icon_back);
         getToolBar().setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,11 +100,21 @@ public class ProductTypeFragment extends BaseFragment {
             public void onRefresh() {
                 adapter.clear();
                 adapter.notifyDataSetChanged();
-                requestData(false);
+                pageIndex = 1;
+                //  if (model == 0) {
+                requestDictData(false);
+                // } else {
+                //     requestData(false);
+                // }
             }
 
             @Override
             public void onLoadMore() {
+                // if (model == 0) {
+                requestDictData(false);
+                // } else {
+                //     requestData(false);
+                //  }
             }
         });
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -128,7 +148,11 @@ public class ProductTypeFragment extends BaseFragment {
             }
         });
         listView.setAdapter(adapter);
-        requestData(true);
+//        if (model == 0) {
+        requestDictData(true);
+//        } else {
+//            requestData(true);
+//        }
     }
 
     @Override
@@ -153,13 +177,38 @@ public class ProductTypeFragment extends BaseFragment {
         }
     }
 
-    private void requestData(boolean show) {
+//    private void requestData(boolean show) {
+//        if (show) {
+//            showLoadImg();
+//        }
+//        Map<String, String> map = new HashMap<>();
+//        map.put("reqType", "4");
+//        getHttpClient().post().url(Constant.DIC_URL).params(Constant.makeParam(map)).build().execute(new StringCallback() {
+//            @Override
+//            public void onError(Call call, Exception e, int i) {
+//                dismissLoadImg();
+//                listView.stopRefresh();
+//                Utils.showToast(getContext(), R.string.server_error);
+//            }
+//
+//            @Override
+//            public void onResponse(String s, int i) {
+//                dismissLoadImg();
+//                listView.stopRefresh();
+//            }
+//        });
+//    }
+
+    private void requestDictData(boolean show) {
         if (show) {
             showLoadImg();
         }
         Map<String, String> map = new HashMap<>();
-        map.put("reqType", "4");
-        getHttpClient().post().url(Constant.DIC_URL).params(Constant.makeParam(map)).build().execute(new StringCallback() {
+        map.put("distCode", MyApp.getInstance().getAccount().getOrgId());
+        map.put("pageIndex", String.valueOf(pageIndex));
+        map.put("pageSize", String.valueOf(Constant.PAGE_SIZE));
+
+        getHttpClient().post().url(Constant.DIST_PRODUCT_LST).params(Constant.makeParam(map)).build().execute(new StringCallback() {
             @Override
             public void onError(Call call, Exception e, int i) {
                 dismissLoadImg();
@@ -171,6 +220,22 @@ public class ProductTypeFragment extends BaseFragment {
             public void onResponse(String s, int i) {
                 dismissLoadImg();
                 listView.stopRefresh();
+                try {
+                    Type type = new TypeToken<BaseObjResponse<ProductList>>() {
+                    }.getType();
+                    BaseObjResponse<ProductList> response = new Gson().fromJson(s, type);
+                    if ("1".equals(response.getResult().getCode())) {
+                        adapter.addAll(response.getResult().getProductList());
+                        adapter.notifyDataSetChanged();
+                        if (response.getResult().getProductList().size() == Constant.PAGE_SIZE) {
+                            pageIndex++;
+                        }
+                    } else {
+                        Utils.showToast(getContext(), response.getResult().getMsg());
+                    }
+                } catch (Exception e) {
+
+                }
             }
         });
     }

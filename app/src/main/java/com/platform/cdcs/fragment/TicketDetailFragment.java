@@ -206,7 +206,7 @@ public class TicketDetailFragment extends BaseFragment {
             public void run() {
                 final List<File> files = new ArrayList<File>();
                 for (ImageItem set : imgs) {
-                    files.add(FileUtil.getSmallBitmap(getContext(), set.path));
+                    files.add(FileUtil.getSmallBitmap(getContext(), set.path.replaceFirst("file://","")));
                 }
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(new Runnable() {
@@ -322,7 +322,7 @@ public class TicketDetailFragment extends BaseFragment {
                         itemView = ViewTool.setUpDownItem(inflater, rootView, "发票号码", response.getResult().getInNO());
                         ((TextView) itemView.findViewById(R.id.text1)).getPaint().setFakeBoldText(true);
 
-                        ViewTool.setFourItem(inflater, rootView, new String[]{"校验码", "发票日期"}, new String[]{response.getResult().getNumber(), response.getResult().getInDate()});
+                        ViewTool.setFourItem(inflater, rootView, new String[]{"校验码", "发票日期"}, new String[]{response.getResult().getVerifyCode(), response.getResult().getInDate()});
                         ViewTool.setUpDownItem(inflater, rootView, "发货方", response.getResult().getDistName());
                         ViewTool.setUpDownItem(inflater, rootView, "客户", response.getResult().getCusName());
                         ViewTool.setSixItem(inflater, rootView, new String[]{"不含税金额 ¥", "税率", "含税金额 ¥"}, new String[]{response.getResult().getNonetaxTotal(), response.getResult().getTax() + "%", response.getResult().getTaxTotal()});
@@ -355,7 +355,37 @@ public class TicketDetailFragment extends BaseFragment {
     /**
      * 删除图片
      */
-    private void deleteImg(int position) {
+    private void deleteImg(final int position) {
+        final PicModel item = adapter.getItem(position);
+        adapter.remove(item);
+        adapter.notifyDataSetChanged();
+        Map<String, String> map = new HashMap<>();
+        map.put("invoiceId", invoiceId);
+        map.put("oldPicIds", adapter.getIds());
+        PostFormBuilder build = getHttpClient().post().url(Constant.INVOICE_PIC_UPLOAD).params(Constant.makeParam(map));
+        build.build().execute(new StringCallback() {
+            @Override
+            public void onError(Call call, Exception e, int i) {
+                dismissLoadImg();
+                Utils.showToast(getContext(), R.string.server_error);
+                adapter.addItem(item, position);
+                adapter.notifyDataSetChanged();
+            }
 
+            @Override
+            public void onResponse(String s, int i) {
+                dismissLoadImg();
+                Type type = new TypeToken<BaseObjResponse<MockObj>>() {
+                }.getType();
+                BaseObjResponse<MockObj> response = new Gson().fromJson(s, type);
+                if ("1".equals(response.getResult().getCode())) {
+                    Utils.showToast(getContext(), "图片删除成功");
+                } else {
+                    Utils.showToast(getContext(), response.getResult().getMsg());
+                    adapter.addItem(item, position);
+                    adapter.notifyDataSetChanged();
+                }
+            }
+        });
     }
 }

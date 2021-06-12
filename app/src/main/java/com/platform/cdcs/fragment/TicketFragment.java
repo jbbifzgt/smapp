@@ -52,11 +52,15 @@ public class TicketFragment extends BaseFragment {
     private ObservableXListView slideListView;
     private ItemAdapter adapter;
     private int pageIndex = 1;
+    private int model;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EventBus.getDefault().register(this);
+        if (getArguments() != null) {
+            model = getArguments().getInt("model");
+        }
         adapter = new ItemAdapter(getContext());
     }
 
@@ -69,22 +73,34 @@ public class TicketFragment extends BaseFragment {
     @Override
     public void initView(View view) {
         initSelfLoadImg(view.findViewById(R.id.load));
-        initToolBar(view);
-        toolbar.setNavigationIcon(R.mipmap.icon_search);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                FragmentUtil.navigateToInNewActivity(getActivity(), TicketSearchFragment.class, null);
-            }
-        });
-        toolbar.getMenu().add(0, 0, 0, "新增发票").setTitle("新增发票").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem menuItem) {
-                startActivity(new Intent(getContext(), TicketScanActivity.class));
-                return false;
-            }
-        }).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-        setFragmentTitle("发票");
+        if (model == 0) {
+            initToolBar(view);
+            toolbar.setNavigationIcon(R.mipmap.icon_search);
+            toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    FragmentUtil.navigateToInNewActivity(getActivity(), TicketSearchFragment.class, null);
+                }
+            });
+            toolbar.getMenu().add(0, 0, 0, "新增发票").setTitle("新增发票").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem menuItem) {
+                    startActivity(new Intent(getContext(), TicketScanActivity.class));
+                    return false;
+                }
+            }).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+            setFragmentTitle("发票");
+        } else {
+            hideThisToolBar(view);
+            getToolBar().setNavigationIcon(R.mipmap.icon_back);
+            getToolBar().setNavigationOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    getActivity().finish();
+                }
+            });
+            setTitle("发票");
+        }
         RelativeLayout headerView = new RelativeLayout(getContext());
         headerView.setBackgroundColor(getResources().getColor(R.color.header_bg));
         AbsListView.LayoutParams llp = new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, AbsListView.LayoutParams.WRAP_CONTENT);
@@ -175,6 +191,13 @@ public class TicketFragment extends BaseFragment {
             showSelfLoadImg();
         }
         Map<String, String> map = new HashMap<>();
+        if (model == 1) {
+            map.put("cusName", getArguments().getString("cusName", ""));
+            map.put("inNO", getArguments().getString("inNO", ""));
+            map.put("startTime", getArguments().getString("startTime", ""));
+            map.put("endTime", getArguments().getString("endTime", ""));
+            map.put("havePic", getArguments().getString("havePic", ""));
+        }
         map.put("pageSize", String.valueOf(Constant.PAGE_SIZE));
         map.put("pageIndex", String.valueOf(pageIndex));
         getHttpClient().post().url(Constant.INVOICE_LST).params(Constant.makeParam(map)).build().execute(new StringCallback() {

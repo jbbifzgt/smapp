@@ -120,8 +120,6 @@ public class MineFragment extends BaseFragment {
                 if (i == 7) {
                     logout();
                 } else if (i == 3) {
-                    CacheTool.clearInputCache(getContext());
-                    CacheTool.clearOutputCache(getContext());
                     FragmentUtil.navigateToInNewActivity(getActivity(), BaseInfoFragment.class, null);
                 } else if (i == 4) {
                     FragmentUtil.navigateToInNewActivity(getActivity(), MsgSettingFragment.class, null);
@@ -150,6 +148,7 @@ public class MineFragment extends BaseFragment {
                     dismissSelfLoadImg();
                     JSONObject obj = new JSONObject(s);
                     if ("1".equals(obj.getJSONObject("result").getString("code"))) {
+                        CacheTool.clearAll(getContext());
                         MyApp.getInstance().getAccount().setLogin(false);
                         MyApp.getInstance().setAccount(MyApp.getInstance().getAccount());
                         Intent intent = new Intent(getContext(), NewLoginActivity.class);

@@ -11,11 +11,15 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.platform.cdcs.MyApp;
 import com.platform.cdcs.R;
 import com.platform.cdcs.fragment.account.AccountListFragment;
+import com.platform.cdcs.fragment.choose.AccountChooseFragment;
 import com.platform.cdcs.model.BaseObjResponse;
 import com.platform.cdcs.model.HouseItem;
+import com.platform.cdcs.model.ProductList;
 import com.platform.cdcs.model.RefershEvent;
+import com.platform.cdcs.model.XtbmItem;
 import com.platform.cdcs.tool.CacheTool;
 import com.platform.cdcs.tool.Constant;
 import com.platform.cdcs.tool.FragmentUtil;
@@ -26,6 +30,9 @@ import com.trueway.app.uilib.tool.Utils;
 import com.trueway.app.uilib.widget.TimeDialogBuilder;
 import com.trueway.app.uilib.widget.TwDialogBuilder;
 import com.zhy.http.okhttp.callback.StringCallback;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -42,8 +49,10 @@ import okhttp3.Call;
  */
 public class EditOutFragment extends BaseFragment {
 
-    private EditText timeET, typeET;
-    private EditText stockET;
+    private EditText timeET, typeET, nameET, bakET;
+    private EditText stockET, addressET;
+    private String[] typeArray, stockarray;
+    private List<ChooseItem> items;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -71,25 +80,28 @@ public class EditOutFragment extends BaseFragment {
 
         LayoutInflater inflater = LayoutInflater.from(getContext());
         LinearLayout rootView1 = (LinearLayout) view.findViewById(R.id.button1);
-        EditText nameET = ViewTool.createEditItem(inflater, "入库单号", rootView1, false, false);
+        nameET = ViewTool.createEditItem(inflater, "入库单号", rootView1, false, false);
         nameET.setHint("请填写出库单号");
-        nameET.setText("TODO");
+        nameET.setText(Constant.makeID(MyApp.getInstance().getAccount().getOrgId()));
+        nameET.setEnabled(false);
 
-        EditText addressET = ViewTool.createEditItem(inflater, "发货方", rootView1, false, true);
+        addressET = ViewTool.createEditItem(inflater, "发货方", rootView1, false, true);
         addressET.setHint("请选择客户");
         addressET.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO
-                FragmentUtil.navigateToInNewActivity(getActivity(), AccountListFragment.class, null);
+                Bundle bundle = new Bundle();
+                bundle.putString("class", EditOutFragment.this.getClass().getName());
+                bundle.putInt("model", 0);
+                FragmentUtil.navigateToInNewActivity(getActivity(), AccountChooseFragment.class, bundle);
             }
         });
         typeET = ViewTool.createEditItem(inflater, "入库类型", rootView1, false, true);
-        typeET.setHint("请选择入货类型");
+        typeET.setHint("请选择入库类型");
         typeET.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                requestType();
+                showType();
             }
         });
 
@@ -119,7 +131,7 @@ public class EditOutFragment extends BaseFragment {
             }
         });
 
-        EditText bakET = ViewTool.createEditItemNoLine(inflater, "备注", rootView1, false, false);
+        bakET = ViewTool.createEditItemNoLine(inflater, "备注", rootView1, false, false);
         bakET.setHint("请填写备注");
 
         LinearLayout rootView2 = (LinearLayout) view.findViewById(R.id.button2);
@@ -154,13 +166,56 @@ public class EditOutFragment extends BaseFragment {
     }
 
     private void finishClick() {
+        if (CacheTool.getInputCount(getContext()) == 0) {
+            Utils.showToast(getContext(), "请先添加产品");
+            return;
+        }
+        showLoadImg();
+        try {
+            JSONObject postObj = new JSONObject();
+            postObj.put("docNo", nameET.getText().toString());
+            postObj.put("docDate", timeET.getText().toString());
+            postObj.put("distName", addressET.getText().toString());
+            postObj.put("distCode", (String) addressET.getTag());
+            if (!TextUtils.isEmpty(stockET.getText().toString())) {
+                postObj.put("whName", stockET.getText().toString());
+                postObj.put("whCode", (String) stockET.getTag());
+            } else {
+                postObj.put("whName", "");
+                postObj.put("whCode", "");
+            }
+            postObj.put("docType", typeET.getText().toString());
+            postObj.put("sysType", "2");
+            JSONArray array = new JSONArray();
+            for (ProductList.ProductItem item : CacheTool.getInputList(getContext())) {
+                array.put(item.toJSON1());
+            }
+            postObj.put("productList", array);
+            getHttpClient().post().url(Constant.WARE_HOUSE).params(Constant.makeParam(postObj.toString())).build().execute(new StringCallback() {
+                @Override
+                public void onError(Call call, Exception e, int i) {
+                    dismissLoadImg();
+                    Utils.showToast(getContext(), R.string.server_error);
+                }
 
+                @Override
+                public void onResponse(String s, int i) {
+                    dismissLoadImg();
+
+                    Bundle bundle=new Bundle();
+                    bundle.putInt("model",0);
+                    FragmentUtil.navigateToInNewActivity(getActivity(),FinishFragment.class,bundle);
+                }
+            });
+        } catch (Exception e) {
+            Utils.showToast(getContext(), "数据错误！");
+        }
     }
 
     /**
      * 库位
      */
-    private void showStock() {
+    private void requestStock() {
         showLoadImg();
         getHttpClient().post().url(Constant.DIST_WHHOUSE_LST).params(Constant.makeParam(new HashMap<String, String>())).build().execute(new StringCallback() {
             @Override
@@ -176,7 +231,7 @@ public class EditOutFragment extends BaseFragment {
                 }.getType();
                 BaseObjResponse<HouseItem.HouseList> response = new Gson().fromJson(s, type);
                 if ("1".equals(response.getResult().getCode())) {
-                    final List<ChooseItem> items = new ArrayList<ChooseItem>();
+                    items = new ArrayList<ChooseItem>();
                     ChooseItem chooseItem = null;
                     for (HouseItem item : response.getResult().getHouseList()) {
                         if ("1".equals(item.getIsMainHouse())) {
@@ -191,16 +246,11 @@ public class EditOutFragment extends BaseFragment {
                             items.add(chooseItem);
                         }
                     }
-                    String[] array = new String[items.size()];
+                    stockarray = new String[items.size()];
                     for (int j = 0; j < items.size(); j++) {
-                        array[j] = items.get(j).getTitle();
+                        stockarray[j] = items.get(j).getTitle();
                     }
-                    new TwDialogBuilder(getContext()).setItems(array, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            stockET.setText(items.get(i).getTitle());
-                        }
-                    }, "").create().show();
+                    showStock();
                 } else {
                     Utils.showToast(getContext(), response.getResult().getMsg());
                 }
@@ -209,13 +259,27 @@ public class EditOutFragment extends BaseFragment {
         });
     }
 
+    private void showStock() {
+        if (stockarray == null) {
+            requestStock();
+        } else {
+            new TwDialogBuilder(getContext()).setItems(stockarray, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    stockET.setText(stockarray[i]);
+                    stockET.setTag(items.get(i).getTime());
+                }
+            }, "").create().show();
+        }
+    }
+
     /**
      * 选择出库，出库类型
      */
     private void requestType() {
         showLoadImg();
         Map<String, String> param = new HashMap<>();
-        param.put("inType", "1");
+        param.put("type", "inType");
         getHttpClient().post().url(Constant.DIC_XTBM).params(Constant.makeParam(param)).build().execute(new StringCallback() {
             @Override
             public void onError(Call call, Exception e, int i) {
@@ -226,18 +290,43 @@ public class EditOutFragment extends BaseFragment {
             @Override
             public void onResponse(String s, int i) {
                 dismissLoadImg();
-                new TwDialogBuilder(getContext()).setItems(new String[]{}, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        //TODO
-                        typeET.setText("");
+                try {
+                    Type mtype = new TypeToken<BaseObjResponse<XtbmItem.XtbmList>>() {
+                    }.getType();
+                    BaseObjResponse<XtbmItem.XtbmList> response = new Gson().fromJson(s, mtype);
+                    if ("1".equals(response.getResult().getCode())) {
+                        typeArray = response.getResult().toArray();
+                        showType();
+                    } else {
+                        Utils.showToast(getContext(), response.getResult().getMsg());
                     }
-                }, "");
+                } catch (Exception e) {
+                    Utils.showToast(getContext(), "解析数据失败");
+                }
             }
         });
     }
 
     @Subscribe
-    public void onEventMainThread() {
+    public void onEventMainThread(RefershEvent event) {
+        if (event.mclass == this.getClass()) {
+            if (event.oclass == AccountChooseFragment.class) {
+                addressET.setText(event.bundle.getString("name"));
+                addressET.setTag(event.bundle.getString("code"));
+            }
+        }
+    }
+
+    private void showType() {
+        if (typeArray == null) {
+            requestType();
+        } else {
+            new TwDialogBuilder(getContext()).setItems(typeArray, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    typeET.setText(typeArray[i]);
+                }
+            }, "").create().show();
+        }
     }
 }

@@ -98,7 +98,7 @@ public class FormDialog {
                     }
                 });
             } else {
-                editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL);
+                editText.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
             }
             rootView.addView(editText);
             if(i==0){

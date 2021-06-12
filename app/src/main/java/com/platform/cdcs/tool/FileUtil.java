@@ -904,12 +904,14 @@ public class FileUtil {
     public static File getSmallBitmap(Context context, String fileSrc) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(fileSrc, options);
+//        BitmapFactory.decodeFile(fileSrc, options);
         options.inSampleSize = calculateInSampleSize(options, 480, 800);
         options.inJustDecodeBounds = false;
         Bitmap img = BitmapFactory.decodeFile(fileSrc, options);
-        String filename = context.getFilesDir() + File.separator + "video-" + img.hashCode() + ".jpg";
+        String filename = tempPicPath();
         saveBitmap2File(img, filename);
+        img.recycle();
+        img = null;
         return new File(filename);
     }
 

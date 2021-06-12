@@ -3,7 +3,11 @@ package com.platform.cdcs.model;
 import android.text.TextUtils;
 
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -14,6 +18,39 @@ public class InvoiceList {
     private String code;
     private String msg;
     private List<Invoice> invoiceList;
+
+    public static List<Invoice> parseList(String array) throws JSONException {
+        List<Invoice> list = new ArrayList<>();
+        JSONArray jsonArray = new JSONArray(array);
+        for (int i = 0; i < jsonArray.length(); i++) {
+            JSONObject obj = jsonArray.getJSONObject(i);
+            Invoice item = new Invoice();
+            item.setInCode(obj.getString("inCode"));
+            item.setInNO(obj.getString("inNO"));
+            item.setInDate(obj.getString("inDate"));
+            item.setNonetaxTotal(obj.getString("nonetaxTotal"));
+            item.setTax(obj.getString("tax"));
+            item.setCusType(obj.getString("cusType"));
+            item.setCusCode(obj.getString("cusCode"));
+            item.setCusName(obj.getString("cusName"));
+            item.setInRemark(obj.getString("inRemark"));
+            item.setVerifyCode(obj.getString("verifyCode"));
+            list.add(item);
+        }
+        return list;
+    }
+
+    public static String ListToString(List<Invoice> invoiceList) {
+        JSONArray array = new JSONArray();
+        try {
+            for (Invoice item : invoiceList) {
+                array.put(item.toJSON());
+            }
+        } catch (Exception e) {
+
+        }
+        return array.toString();
+    }
 
     public String getCode() {
         return code;
@@ -52,6 +89,7 @@ public class InvoiceList {
         private String inCode;
         private String cusName;
         private String cusCode;
+        private String cusType;
         private String inRemark;
         private String nonetaxTotal;
         private String taxTotal;
@@ -61,6 +99,34 @@ public class InvoiceList {
         private String tax;
         private String number;
         private String status;
+        private String verifyCode;
+
+        public JSONObject toJSON() {
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("inCode", inCode);
+                obj.put("inNO", inNO);
+                obj.put("inDate", inDate);
+                obj.put("nonetaxTotal", nonetaxTotal);
+                obj.put("tax", tax);
+                obj.put("cusType", cusType);
+                obj.put("cusCode", cusCode);
+                obj.put("cusName", cusName);
+                obj.put("inRemark", inRemark);
+                obj.put("verifyCode", verifyCode);
+            } catch (Exception e) {
+
+            }
+            return obj;
+        }
+
+        public String getCusType() {
+            return cusType;
+        }
+
+        public void setCusType(String cusType) {
+            this.cusType = cusType;
+        }
 
         public String getInvoiceId() {
             return invoiceId;
@@ -166,8 +232,16 @@ public class InvoiceList {
             this.msg = msg;
         }
 
+        public String getVerifyCode() {
+            return verifyCode;
+        }
+
+        public void setVerifyCode(String verifyCode) {
+            this.verifyCode = verifyCode;
+        }
+
         public String getInRemark() {
-            if(TextUtils.isEmpty(inRemark)){
+            if (TextUtils.isEmpty(inRemark)) {
                 return "";
             }
             return inRemark;
@@ -202,6 +276,9 @@ public class InvoiceList {
         }
 
         public String getTax() {
+            if(TextUtils.isEmpty(tax)){
+                return "--";
+            }
             return tax;
         }
 
@@ -223,6 +300,18 @@ public class InvoiceList {
 
         public void setStatus(String status) {
             this.status = status;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == null)
+                return false;
+            if (this == o)
+                return true;
+            if (getClass() != o.getClass())
+                return false;
+            Invoice other = (Invoice) o;
+            return other.getInCode().equals(getInCode()) && other.getInNO().equals(getInNO());
         }
     }
 
